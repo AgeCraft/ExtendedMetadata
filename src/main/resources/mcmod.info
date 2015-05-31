@@ -1,0 +1,16 @@
+[
+{
+  "modid": "ExtendedMetadata",
+  "name": "ExtendedMetadata",
+  "description": "A Forge core mod that increases the block ID and metadata limit",
+  "version": "${version}",
+  "mcversion": "${mc_version}",
+  "url": "https://github.com/AgeCraft/ExtendedMetadata",
+  "updateUrl": "",
+  "authorList": ["DanielHuisman"],
+  "credits": "AgeCraft Team",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
