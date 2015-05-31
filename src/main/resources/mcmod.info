@@ -11,6 +11,8 @@
   "credits": "AgeCraft Team",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": []
+  "dependencies": [
+  	"CodeChickenCore"
+  ]
 }
 ]
