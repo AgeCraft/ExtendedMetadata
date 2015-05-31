@@ -75,6 +75,15 @@ processResources {
     }
 }
 
+def commonManifest = {
+    attributes 'FMLCorePlugin': 'org.agecraft.extendedmetadata.asm.MECorePlugin'
+}
+
+jar {
+    classifier = 'universal'
+    manifest commonManifest
+}
+
 task sourceJar(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
@@ -88,6 +97,7 @@ task javadocJar(type: Jar) {
 task deobfJar(type: Jar) {
     from sourceSets.main.output
     classifier = 'dev'
+    manifest commonManifest
 }
 
 build.dependsOn sourceJar, javadocJar, deobfJar
