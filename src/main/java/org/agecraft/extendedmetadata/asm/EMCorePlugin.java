@@ -6,7 +6,6 @@ import java.util.Map;
 import net.minecraftforge.fml.relauncher.IFMLCallHook;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
-import codechicken.core.launch.CodeChickenCorePlugin;
 
 @TransformerExclusions({"org.agecraft.extendedmetadata.asm"})
 public class EMCorePlugin implements IFMLLoadingPlugin, IFMLCallHook {
@@ -15,7 +14,7 @@ public class EMCorePlugin implements IFMLLoadingPlugin, IFMLCallHook {
 
 	@Override
 	public String[] getASMTransformerClass() {
-		CodeChickenCorePlugin.versionCheck(CodeChickenCorePlugin.mcVersion, "ExtendedMetadata");
+		//CodeChickenCorePlugin.versionCheck(CodeChickenCorePlugin.mcVersion, "ExtendedMetadata");
 		return new String[]{"org.agecraft.extendedmetadata.asm.EMTransformer"};
 	}
 

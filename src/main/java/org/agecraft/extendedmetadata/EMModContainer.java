@@ -12,11 +12,8 @@ import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.MetadataCollection;
 import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import net.minecraftforge.fml.common.versioning.VersionParser;
 
 import org.agecraft.extendedmetadata.asm.EMCorePlugin;
-
-import codechicken.core.launch.CodeChickenCorePlugin;
 
 import com.google.common.eventbus.EventBus;
 
@@ -29,7 +26,7 @@ public class EMModContainer extends DummyModContainer {
 	@Override
 	public Set<ArtifactVersion> getRequirements() {
 		Set<ArtifactVersion> deps = new HashSet<ArtifactVersion>();
-		deps.add(VersionParser.parseVersionReference("CodeChickenCore@[" + CodeChickenCorePlugin.version + ",)"));
+		//deps.add(VersionParser.parseVersionReference("CodeChickenCore@[" + CodeChickenCorePlugin.version + ",)"));
 		return deps;
 	}
 
