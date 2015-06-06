@@ -8,6 +8,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -16,6 +17,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import codechicken.lib.asm.ModularASMTransformer;
+import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
 import codechicken.lib.asm.ObfMapping;
 
 public class EMTransformer implements IClassTransformer {
@@ -40,6 +42,23 @@ public class EMTransformer implements IClassTransformer {
 						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
+					}
+				}
+			}
+		});
+		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "get", "(III)Lnet/minecraft/block/state/IBlockState;")) {
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.GETFIELD) {
+						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
+						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[C")) {
+							fieldInsn.desc = "[I";
+						}
+					} else if(insn.getOpcode() == Opcodes.CALOAD) {
+						methodNode.instructions.set(insn, new InsnNode(Opcodes.IALOAD));
 					}
 				}
 			}
@@ -100,6 +119,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
+		
 		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/stats/StatList", "<clinit>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -117,6 +137,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
+		
 		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/util/ObjectIntIdentityMap", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -133,7 +154,86 @@ public class EMTransformer implements IClassTransformer {
 						if(methodInsn.name.equals("newArrayList") && methodInsn.desc.equals("()Ljava/util/ArrayList;")) {
 							methodInsn.name = "newArrayListWithExpectedSize";
 							methodInsn.desc = "(I)Ljava/util/ArrayList;";
-							methodNode.instructions.insert(insn, new LdcInsnNode(new Integer(8192)));
+							methodNode.instructions.insertBefore(insn, new LdcInsnNode(new Integer(8192)));
+						}
+					}
+				}
+			}
+		});
+		
+		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.NEWARRAY) {
+						IntInsnNode intInsn = (IntInsnNode) insn;
+						if(intInsn.operand == Opcodes.T_SHORT) {
+							intInsn.operand = Opcodes.T_INT;
+						}
+					} else if(insn.getOpcode() == Opcodes.PUTFIELD) {
+						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
+						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[S")) {
+							fieldInsn.desc = "[I";
+						}
+					}
+				}
+			}
+		});
+		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "getBlockState", "(I)Lnet/minecraft/block/state/IBlockState;")) {
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.GETFIELD) {
+						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
+						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[S")) {
+							fieldInsn.desc = "[I";
+						}
+					} else if(insn.getOpcode() == Opcodes.SALOAD) {
+						methodNode.instructions.set(insn, new InsnNode(Opcodes.IALOAD));
+					}
+				}
+			}
+		});
+		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "setBlockState", "(ILnet/minecraft/block/state/IBlockState;)V")) {
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.GETFIELD) {
+						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
+						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[S")) {
+							fieldInsn.desc = "[I";
+						}
+					} else if(insn.getOpcode() == Opcodes.I2S) {
+						methodNode.instructions.remove(insn);
+					} else if(insn.getOpcode() == Opcodes.SASTORE) {
+						methodNode.instructions.set(insn, new InsnNode(Opcodes.IASTORE));
+					}
+				}
+			}
+		});
+		
+		transformer.add(new ClassNodeTransformer() {
+			@Override
+			public String className() {
+				return "net.minecraftforge.fml.common.registry.GameData";
+			}
+
+			@Override
+			public void transform(ClassNode node) {
+				for(FieldNode fieldNode : node.fields) {
+					if(fieldNode.desc.equals("I")) {
+						if(fieldNode.name.equals("MAX_BLOCK_ID")) {
+							fieldNode.value = 32767;
+						} else if(fieldNode.name.equals("MIN_ITEM_ID")) {
+							fieldNode.value = 32768;
+						} else if(fieldNode.name.equals("MAX_ITEM_ID")) {
+							fieldNode.value = 65535;
 						}
 					}
 				}
