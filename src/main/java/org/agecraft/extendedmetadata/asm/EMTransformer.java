@@ -1,6 +1,7 @@
 package org.agecraft.extendedmetadata.asm;
 
 import java.util.ListIterator;
+import java.util.Map;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 
@@ -16,13 +17,19 @@ import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import codechicken.lib.asm.ASMBlock;
+import codechicken.lib.asm.ASMReader;
+import codechicken.lib.asm.InsnComparator;
+import codechicken.lib.asm.InsnListSection;
 import codechicken.lib.asm.ModularASMTransformer;
 import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
+import codechicken.lib.asm.ModularASMTransformer.MethodReplacer;
 import codechicken.lib.asm.ObfMapping;
 
 public class EMTransformer implements IClassTransformer {
 	
 	private ModularASMTransformer transformer = new ModularASMTransformer();
+	private Map<String, ASMBlock> asmblocks = ASMReader.loadResource("/assets/extendedmetadata/asm/blocks.asm");
 	
 	public EMTransformer() {
 		transformer.add(new FieldTypeTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "data", "[C"), "[I"));
@@ -239,8 +246,61 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-	}
+		final ASMBlock needle = asmblocks.get("old_registerBlock");
+		final ASMBlock replacement = asmblocks.get("registerBlock");
+		transformer.add(new ClassNodeTransformer() {
+			@Override
+			public String className() {
+				return "net.minecraftforge.fml.common.registry.GameData";
+			}
 
+			@Override
+			public void transform(ClassNode node) {
+				for(MethodNode methodNode : node.methods) {
+					if(methodNode.name.equals("registerBlock") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Ljava/lang/String;I)I")) {
+						for(InsnListSection key : InsnComparator.findN(methodNode.instructions, needle.list)) {
+			                ASMBlock replaceBlock = replacement.copy().pullLabels(needle.applyLabels(key));
+			                key.insert(replaceBlock.list.list);
+			            }
+					}
+				}
+			}
+		});
+		
+		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "getStateId", "(Lnet/minecraft/block/state/IBlockState;)I"), asmblocks.get("old_getStateId"), asmblocks.get("getStateId")));
+		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "getStateById", "(I)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("old_getStateById"), asmblocks.get("getStateById")));
+	
+		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.ICONST_2) {
+						methodNode.instructions.set(insn, new InsnNode(Opcodes.ICONST_4));
+						break;
+					}
+				}
+			}
+		});
+		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;")) {
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+						MethodInsnNode methodInsn = (MethodInsnNode) insn;
+						if(methodInsn.name.equals("getData") && methodInsn.desc.equals("()[C")) {
+							methodInsn.desc = "()[I";
+						}
+					}
+				}
+			}
+		});
+		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;"), asmblocks.get("old_func_179756_a"), asmblocks.get("func_179756_a")));
+	}
+	
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
 		if(bytes == null) {
