@@ -11,6 +11,7 @@ import net.minecraftforge.fml.client.FMLFolderResourcePack;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.MetadataCollection;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.versioning.ArtifactVersion;
 import net.minecraftforge.fml.common.versioning.VersionParser;
 
@@ -19,6 +20,7 @@ import org.agecraft.extendedmetadata.asm.EMCorePlugin;
 import codechicken.core.launch.CodeChickenCorePlugin;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class EMModContainer extends DummyModContainer {
 
@@ -52,5 +54,10 @@ public class EMModContainer extends DummyModContainer {
 	@Override
 	public Class<?> getCustomResourcePackClass() {
 		return getSource().isDirectory() ? FMLFolderResourcePack.class : FMLFileResourcePack.class;
+	}
+	
+	@Subscribe
+	public void preInit(FMLPreInitializationEvent event) {
+		ExtendedMetadata.init();
 	}
 }

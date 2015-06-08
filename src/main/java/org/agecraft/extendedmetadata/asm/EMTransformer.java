@@ -1,5 +1,6 @@
 package org.agecraft.extendedmetadata.asm;
 
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map;
 
@@ -168,6 +169,7 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		
+		transformer.add(new FieldTypeTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "data", "[S"), "[I"));
 		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -273,10 +275,12 @@ public class EMTransformer implements IClassTransformer {
 		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				System.out.println("EDITING PACKET S21 CLASS");
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.ICONST_2) {
+						System.out.println("FOUND THE ICONST_2 AND REPLACED IT");
 						methodNode.instructions.set(insn, new InsnNode(Opcodes.ICONST_4));
 						break;
 					}
@@ -299,8 +303,35 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;"), asmblocks.get("old_func_179756_a"), asmblocks.get("func_179756_a")));
+		
+		transformer.add(new MethodReplaceTransformer(new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "readChunkFromNBT", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;"), asmblocks.get("readChunkFromNBT")) {
+			@Override
+			public void transformMethodLocals(MethodNode methodNode) {
+				Iterator<LocalVariableNode> iterator = methodNode.localVariables.iterator();
+				while(iterator.hasNext()) {
+					LocalVariableNode node = iterator.next();
+					if(node.index > 2) {
+						iterator.remove();
+					}
+				}
+				methodNode.maxLocals = 3;
+			}
+		});
+		transformer.add(new MethodReplaceTransformer(new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "writeChunkToNBT", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V"), asmblocks.get("writeChunkToNBT")) {
+			@Override
+			public void transformMethodLocals(MethodNode methodNode) {
+				Iterator<LocalVariableNode> iterator = methodNode.localVariables.iterator();
+				while(iterator.hasNext()) {
+					LocalVariableNode node = iterator.next();
+					if(node.index > 3) {
+						iterator.remove();
+					}
+				}
+				methodNode.maxLocals = 4;
+			}
+		});
 	}
-	
+
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
 		if(bytes == null) {
