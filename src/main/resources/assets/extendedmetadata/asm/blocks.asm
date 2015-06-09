@@ -31,8 +31,13 @@ INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.getIDFromState (ILne
 INVOKEVIRTUAL net/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap.put (Ljava/lang/Object;I)V
 
 # net.minecraft.world.Chunk
-#list readChunkFromPacket
-
+list readChunkFromPacket
+ALOAD 0
+ALOAD 1
+ILOAD 2
+ILOAD 3
+INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.readChunkFromPacket (Lnet/minecraft/world/chunk/Chunk;[BIZ)V
+RETURN
 
 # net.minecraft.network.play.server.S21PacketChunkData
 list writeChunkToPacket
@@ -56,3 +61,61 @@ ALOAD 2
 ALOAD 3
 INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.writeChunkToNBT (Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V
 RETURN
+
+# net.minecraft.block.Block
+list old_registerBlocks
+GETSTATIC net/minecraft/block/Block.blockRegistry : Lnet/minecraft/util/RegistryNamespacedDefaultedByKey;
+ALOAD 14
+INVOKEVIRTUAL net/minecraft/util/RegistryNamespacedDefaultedByKey.getIDForObject (Ljava/lang/Object;)I
+ICONST_4
+ISHL
+ALOAD 14
+ALOAD 16
+INVOKEVIRTUAL net/minecraft/block/Block.getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I
+IOR
+ISTORE 17
+
+list registerBlocks
+GETSTATIC net/minecraft/block/Block.blockRegistry : Lnet/minecraft/util/RegistryNamespacedDefaultedByKey;
+ALOAD 14
+INVOKEVIRTUAL net/minecraft/util/RegistryNamespacedDefaultedByKey.getIDForObject (Ljava/lang/Object;)I
+LDC 32767
+IAND
+BIPUSH 16
+ISHL
+ALOAD 14
+ALOAD 16
+INVOKEVIRTUAL net/minecraft/block/Block.getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I
+LDC 65535
+IAND
+IOR
+ISTORE 17
+
+# net.minecraft.client.renderer.RenderGlobal
+list old_playAusSFX_1
+ILOAD 4
+SIPUSH 4095
+IAND
+INVOKESTATIC net/minecraft/block/Block.getBlockById (I)Lnet/minecraft/block/Block;
+
+list playAusSFX_1
+ILOAD 4
+BIPUSH 16
+ISHR 16
+LDC 32767
+IAND
+INVOKESTATIC net/minecraft/block/Block.getBlockById (I)Lnet/minecraft/block/Block;
+
+list old_playAusSFX_2
+ILOAD 4
+BIPUSH 12
+ISHR
+SIPUSH 255
+IAND
+INVOKEVIRTUAL net/minecraft/block/Block.getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState;
+
+list playAusSFX_2
+ILOAD 4
+LDC 65535
+IAND
+INVOKEVIRTUAL net/minecraft/block/Block.getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState;

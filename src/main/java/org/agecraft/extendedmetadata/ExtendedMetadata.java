@@ -1,11 +1,11 @@
 package org.agecraft.extendedmetadata;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import com.google.common.collect.Lists;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -20,12 +20,25 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.NibbleArray;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import com.google.common.collect.Lists;
 
 public class ExtendedMetadata {
 
 	public static Method getData;
 	public static Method setData;
 	
+	public static Field chunkWorldObj;
+	public static Field chunkStorageArrays;
+	public static Field chunkTileEntityMap;
+	public static Field chunkBlockBiomeArray;
+	public static Field chunkIsLightPopulated;
+	public static Field chunkIsTerrainPopulated;
+	public static Method chunkGenerateHeightMap;
+
 	public static Method func_180737_a;
 	public static Method func_179757_a;
 
@@ -33,10 +46,26 @@ public class ExtendedMetadata {
 		try {
 			getData = ExtendedBlockStorage.class.getDeclaredMethod("getData");
 			setData = ExtendedBlockStorage.class.getDeclaredMethod("setData", int[].class);
+
+			chunkWorldObj = Chunk.class.getDeclaredField("worldObj");
+			chunkWorldObj.setAccessible(true);
+			chunkStorageArrays = Chunk.class.getDeclaredField("storageArrays");
+			chunkStorageArrays.setAccessible(true);
+			chunkTileEntityMap = Chunk.class.getDeclaredField("chunkTileEntityMap");
+			chunkTileEntityMap.setAccessible(true);
+			chunkBlockBiomeArray = Chunk.class.getDeclaredField("blockBiomeArray");
+			chunkBlockBiomeArray.setAccessible(true);
+			chunkIsLightPopulated = Chunk.class.getDeclaredField("isLightPopulated");
+			chunkIsLightPopulated.setAccessible(true);
+			chunkIsTerrainPopulated = Chunk.class.getDeclaredField("isTerrainPopulated");
+			chunkIsTerrainPopulated.setAccessible(true);
+			if(FMLLaunchHandler.side().isClient()) {
+				chunkGenerateHeightMap = Chunk.class.getDeclaredMethod("generateHeightMap");
+				chunkGenerateHeightMap.setAccessible(true);
+			}
 			
 			func_180737_a = S21PacketChunkData.class.getDeclaredMethod("func_180737_a", int.class, boolean.class, boolean.class);
 			func_180737_a.setAccessible(true);
-			
 			func_179757_a = S21PacketChunkData.class.getDeclaredMethod("func_179757_a", byte[].class, byte[].class, int.class);
 			func_179757_a.setAccessible(true);
 		} catch(Exception e) {
@@ -111,7 +140,7 @@ public class ExtendedMetadata {
 			try {
 				setData.invoke(extendedblockstorage, data);
 			} catch(Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			extendedblockstorage.setBlocklightArray(new NibbleArray(nbttagcompound1.getByteArray("BlockLight")));
 			if(flag) {
@@ -154,7 +183,7 @@ public class ExtendedMetadata {
 				try {
 					data = (int[]) getData.invoke(extendedblockstorage);
 				} catch(Exception e) {
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 				byte[] arrayBlock = new byte[data.length];
 				byte[] arrayBlockExt = null;
@@ -264,11 +293,100 @@ public class ExtendedMetadata {
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
+	public static void readChunkFromPacket(Chunk chunk, byte[] data, int chunks, boolean sendBiomes) {
+		World worldObj = null;
+		ExtendedBlockStorage[] storageArrays = null;
+		Map<?, ?> tileEntityMap = null;
+		byte[] blockBiomeArray = null;
+		try {
+			worldObj = (World) chunkWorldObj.get(chunk);
+			storageArrays = (ExtendedBlockStorage[]) chunkStorageArrays.get(chunk);
+			tileEntityMap = (Map<?, ?>) chunkTileEntityMap.get(chunk);
+			blockBiomeArray = (byte[]) chunkBlockBiomeArray.get(chunk);
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+		Iterator<?> iterator = tileEntityMap.values().iterator();
+		while(iterator.hasNext()) {
+			TileEntity tileEntity = (TileEntity) iterator.next();
+			tileEntity.updateContainingBlockInfo();
+			tileEntity.getBlockMetadata();
+			tileEntity.getBlockType();
+		}
+		int j = 0;
+		boolean flag1 = !worldObj.provider.getHasNoSky();
+		for(int i = 0; i < storageArrays.length; ++i) {
+			if((chunks & 1 << i) != 0) {
+				if(storageArrays[i] == null) {
+					storageArrays[i] = new ExtendedBlockStorage(i << 4, flag1);
+				}
+				int[] aint = null;
+				try {
+					aint = (int[]) getData.invoke(storageArrays[i]);
+				} catch(Exception e) {
+					throw new RuntimeException(e);
+				}
+				for(int l = 0; l < aint.length; ++l) {
+					aint[l] = (((data[j + 1] & 127) << 24) | ((data[j] & 255) << 16) | ((data[j + 3] & 255) << 8) | (data[j + 2] & 255));
+					j += 4;
+				}
+			} else if(sendBiomes && storageArrays[i] != null) {
+				storageArrays[i] = null;
+			}
+		}
+		NibbleArray nibblearray;
+		for(int i = 0; i < storageArrays.length; ++i) {
+			if((chunks & 1 << i) != 0 && storageArrays[i] != null) {
+				nibblearray = storageArrays[i].getBlocklightArray();
+				System.arraycopy(data, j, nibblearray.getData(), 0, nibblearray.getData().length);
+				j += nibblearray.getData().length;
+			}
+		}
+		if(flag1) {
+			for(int i = 0; i < storageArrays.length; ++i) {
+				if((chunks & 1 << i) != 0 && storageArrays[i] != null) {
+					nibblearray = storageArrays[i].getSkylightArray();
+					System.arraycopy(data, j, nibblearray.getData(), 0, nibblearray.getData().length);
+					j += nibblearray.getData().length;
+				}
+			}
+		}
+		if(sendBiomes) {
+			System.arraycopy(data, j, blockBiomeArray, 0, blockBiomeArray.length);
+			j += blockBiomeArray.length;
+		}
+		for(int i = 0; i < storageArrays.length; ++i) {
+			if(storageArrays[i] != null && (chunks & 1 << i) != 0) {
+				storageArrays[i].removeInvalidBlocks();
+			}
+		}
+		try {
+			chunkIsLightPopulated.setBoolean(chunk, true);
+			chunkIsTerrainPopulated.setBoolean(chunk, true);
+			chunkGenerateHeightMap.invoke(chunk);
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+		List<TileEntity> invalidList = new ArrayList<TileEntity>();
+		iterator = tileEntityMap.values().iterator();
+		while(iterator.hasNext()) {
+			TileEntity tileentity = (TileEntity) iterator.next();
+			if(tileentity.shouldRefresh(worldObj, tileentity.getPos(), tileentity.getBlockType().getStateFromMeta(tileentity.getBlockMetadata()), chunk.getBlockState(tileentity.getPos()))) {
+				invalidList.add(tileentity);
+			}
+			tileentity.updateContainingBlockInfo();
+		}
+		for(TileEntity te : invalidList) {
+			te.invalidate();
+		}
+	}
+
 	public static S21PacketChunkData.Extracted writeChunkToPacket(Chunk chunk, boolean sendAllChunks, boolean sendSkylight, int chunks) {
 		ExtendedBlockStorage[] aextendedblockstorage = chunk.getBlockStorageArray();
 		S21PacketChunkData.Extracted extracted = new S21PacketChunkData.Extracted();
 		ArrayList<ExtendedBlockStorage> arraylist = Lists.newArrayList();
-		
+
 		for(int i = 0; i < aextendedblockstorage.length; ++i) {
 			ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[i];
 
@@ -282,7 +400,7 @@ public class ExtendedMetadata {
 			int i = 0;
 			Iterator<ExtendedBlockStorage> iterator = arraylist.iterator();
 			ExtendedBlockStorage extendedblockstorage1;
-	
+
 			while(iterator.hasNext()) {
 				extendedblockstorage1 = (ExtendedBlockStorage) iterator.next();
 				int[] data = null;
@@ -290,13 +408,15 @@ public class ExtendedMetadata {
 					data = (int[]) getData.invoke(extendedblockstorage1);
 				} catch(Exception e) {
 					e.printStackTrace();
-				}			
+				}
 				int[] aint1 = data;
 				int k = data.length;
 				for(int l = 0; l < k; ++l) {
 					int c0 = aint1[l];
+					extracted.data[i++] = (byte) ((c0 >> 16) & 255);
+					extracted.data[i++] = (byte) ((c0 >> 24) & 127);
 					extracted.data[i++] = (byte) (c0 & 255);
-					extracted.data[i++] = (byte) (c0 >> 8 & 255);
+					extracted.data[i++] = (byte) ((c0 >> 8) & 255);
 				}
 			}
 			for(iterator = arraylist.iterator(); iterator.hasNext(); i = (Integer) func_179757_a.invoke(null, extendedblockstorage1.getBlocklightArray().getData(), extracted.data, i)) {

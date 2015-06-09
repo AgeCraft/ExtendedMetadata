@@ -4,6 +4,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -23,6 +24,7 @@ import codechicken.lib.asm.InsnComparator;
 import codechicken.lib.asm.InsnListSection;
 import codechicken.lib.asm.ModularASMTransformer;
 import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
+import codechicken.lib.asm.ModularASMTransformer.MethodReplacer;
 import codechicken.lib.asm.ModularASMTransformer.MethodWriter;
 import codechicken.lib.asm.ObfMapping;
 
@@ -270,7 +272,7 @@ public class EMTransformer implements IClassTransformer {
 		
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "getStateId", "(Lnet/minecraft/block/state/IBlockState;)I"), asmblocks.get("getStateId")));
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "getStateById", "(I)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("getStateById")));
-
+		
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -288,6 +290,15 @@ public class EMTransformer implements IClassTransformer {
 		
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "readChunkFromNBT", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;"), asmblocks.get("readChunkFromNBT")));
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "writeChunkToNBT", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V"), asmblocks.get("writeChunkToNBT")));
+
+		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "registerBlocks", "()V"), asmblocks.get("old_registerBlocks"), asmblocks.get("registerBlocks")));
+		
+		if(FMLLaunchHandler.side().isClient()) {
+			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/Chunk", "fillChunk", "([BIZ)V"), asmblocks.get("readChunkFromPacket")));
+			
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "playAusSFX", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_1"), asmblocks.get("playAusSFX_1")));
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "playAusSFX", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_2"), asmblocks.get("playAusSFX_2")));
+		}
 	}
 
 	@Override
