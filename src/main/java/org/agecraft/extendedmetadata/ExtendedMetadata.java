@@ -98,7 +98,6 @@ public class ExtendedMetadata {
 			
 			// extendedblockstorage.setData(aint);
 			try {
-				System.out.println("YUP");
 				setData.invoke(extendedblockstorage, aint);
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -145,7 +144,7 @@ public class ExtendedMetadata {
 				int[] data = null;
 				try {
 					// data = extendedblockstorage.getData();
-					data = (int[]) setData.invoke(extendedblockstorage);
+					data = (int[]) getData.invoke(extendedblockstorage);
 				} catch(Exception e) {
 					e.printStackTrace();
 				}

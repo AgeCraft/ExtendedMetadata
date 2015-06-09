@@ -42,7 +42,7 @@ public class EMModContainer extends DummyModContainer {
 
 	@Override
 	public boolean registerBus(EventBus bus, LoadController controller) {
-		bus.register(true);
+		bus.register(this);
 		return true;
 	}
 
