@@ -7,11 +7,11 @@ import codechicken.lib.asm.ASMHelper;
 import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
 import codechicken.lib.asm.ObfMapping;
 
-public abstract class MethodEditTransformer extends ClassNodeTransformer {
+public abstract class MethodEditor extends ClassNodeTransformer {
 
 	public final ObfMapping method;
 
-	public MethodEditTransformer(ObfMapping method) {
+	public MethodEditor(ObfMapping method) {
 		this.method = method.toClassloading();
 	}
 

@@ -23,7 +23,6 @@ import codechicken.lib.asm.InsnComparator;
 import codechicken.lib.asm.InsnListSection;
 import codechicken.lib.asm.ModularASMTransformer;
 import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
-import codechicken.lib.asm.ModularASMTransformer.MethodReplacer;
 import codechicken.lib.asm.ModularASMTransformer.MethodWriter;
 import codechicken.lib.asm.ObfMapping;
 
@@ -33,8 +32,8 @@ public class EMTransformer implements IClassTransformer {
 	private Map<String, ASMBlock> asmblocks = ASMReader.loadResource("/assets/extendedmetadata/asm/blocks.asm");
 	
 	public EMTransformer() {
-		transformer.add(new FieldTypeTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "data", "[C"), "[I"));
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "<init>", "(IZ)V")) {
+		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "data", "[C"), "[I"));
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "<init>", "(IZ)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -54,7 +53,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "get", "(III)Lnet/minecraft/block/state/IBlockState;")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "get", "(III)Lnet/minecraft/block/state/IBlockState;")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -71,7 +70,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "set", "(IIILnet/minecraft/block/state/IBlockState;)V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "set", "(IIILnet/minecraft/block/state/IBlockState;)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -90,7 +89,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "getData", "()[C")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "getData", "()[C")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				methodNode.desc = "()[I";
@@ -106,7 +105,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "setData", "([C)V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "setData", "([C)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				methodNode.desc = "([I)V";
@@ -128,7 +127,7 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/stats/StatList", "<clinit>", "()V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/stats/StatList", "<clinit>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -146,7 +145,7 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/util/ObjectIntIdentityMap", "<init>", "()V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/util/ObjectIntIdentityMap", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -169,8 +168,8 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		
-		transformer.add(new FieldTypeTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "data", "[S"), "[I"));
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
+		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "data", "[S"), "[I"));
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -190,7 +189,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "getBlockState", "(I)Lnet/minecraft/block/state/IBlockState;")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "getBlockState", "(I)Lnet/minecraft/block/state/IBlockState;")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -207,7 +206,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "setBlockState", "(ILnet/minecraft/block/state/IBlockState;)V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "setBlockState", "(ILnet/minecraft/block/state/IBlockState;)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -269,47 +268,26 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		
-		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "getStateId", "(Lnet/minecraft/block/state/IBlockState;)I"), asmblocks.get("old_getStateId"), asmblocks.get("getStateId")));
-		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "getStateById", "(I)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("old_getStateById"), asmblocks.get("getStateById")));
-	
-//		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
-//			@Override
-//			public void transformMethod(ClassNode node, MethodNode methodNode) {
-//				System.out.println("EDITING PACKET S21 CLASS");
-//				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
-//				while(iterator.hasNext()) {
-//					AbstractInsnNode insn = iterator.next();
-//					if(insn.getOpcode() == Opcodes.ICONST_2) {
-//						System.out.println("FOUND THE ICONST_2 AND REPLACED IT");
-//						methodNode.instructions.set(insn, new InsnNode(Opcodes.ICONST_4));
-//						break;
-//					}
-//				}
-//			}
-//		});
-//		transformer.add(new MethodEditTransformer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;")) {
-//			@Override
-//			public void transformMethod(ClassNode node, MethodNode methodNode) {
-//				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
-//				while(iterator.hasNext()) {
-//					AbstractInsnNode insn = iterator.next();
-//					if(insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
-//						MethodInsnNode methodInsn = (MethodInsnNode) insn;
-//						if(methodInsn.name.equals("getData") && methodInsn.desc.equals("()[C")) {
-//							System.out.println("FOUND INVOKEVIRTUAL getData AND EDITED IT");
-//							methodInsn.desc = "()[I";
-//						}
-//					}
-//				}
-//			}
-//		});
-		//transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;"), asmblocks.get("old_func_179756_a"), asmblocks.get("func_179756_a")));
-		
-		transformer.add(new MethodRemoveTransformer(new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "readChunkFromNBT", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;")));
-		transformer.add(new MethodWriter(Opcodes.ACC_PRIVATE, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "readChunkFromNBT", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;"), asmblocks.get("readChunkFromNBT")));
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "getStateId", "(Lnet/minecraft/block/state/IBlockState;)I"), asmblocks.get("getStateId")));
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "getStateById", "(I)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("getStateById")));
 
-		transformer.add(new MethodRemoveTransformer(new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "writeChunkToNBT", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V")));
-		transformer.add(new MethodWriter(Opcodes.ACC_PRIVATE, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "writeChunkToNBT", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V"), asmblocks.get("writeChunkToNBT")));
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.ICONST_2) {
+						methodNode.instructions.set(insn, new InsnNode(Opcodes.ICONST_4));
+						break;
+					}
+				}
+			}
+		});
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;"), asmblocks.get("writeChunkToPacket")));
+		
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "readChunkFromNBT", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;"), asmblocks.get("readChunkFromNBT")));
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "writeChunkToNBT", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V"), asmblocks.get("writeChunkToNBT")));
 	}
 
 	@Override

@@ -7,12 +7,12 @@ import codechicken.lib.asm.ASMHelper;
 import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
 import codechicken.lib.asm.ObfMapping;
 
-public class FieldTypeTransformer extends ClassNodeTransformer {
+public class FieldTypeChanger extends ClassNodeTransformer {
 
 	public final ObfMapping field;
 	public final String desc;
 	
-	public FieldTypeTransformer(ObfMapping field, String desc) {
+	public FieldTypeChanger(ObfMapping field, String desc) {
 		this.field = field.toClassloading();
 		this.desc = desc;
 	}

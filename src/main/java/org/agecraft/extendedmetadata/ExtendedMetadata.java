@@ -1,14 +1,18 @@
 package org.agecraft.extendedmetadata;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.play.server.S21PacketChunkData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.NextTickListEntry;
@@ -18,16 +22,25 @@ import net.minecraft.world.chunk.NibbleArray;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 public class ExtendedMetadata {
-	
+
 	public static Method getData;
 	public static Method setData;
 	
+	public static Method func_180737_a;
+	public static Method func_179757_a;
+
 	public static void init() {
 		try {
 			getData = ExtendedBlockStorage.class.getDeclaredMethod("getData");
 			setData = ExtendedBlockStorage.class.getDeclaredMethod("setData", int[].class);
+			
+			func_180737_a = S21PacketChunkData.class.getDeclaredMethod("func_180737_a", int.class, boolean.class, boolean.class);
+			func_180737_a.setAccessible(true);
+			
+			func_179757_a = S21PacketChunkData.class.getDeclaredMethod("func_179757_a", byte[].class, byte[].class, int.class);
+			func_179757_a.setAccessible(true);
 		} catch(Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException("Error while initializing ExtendedMetadata: ", e);
 		}
 	}
 
@@ -88,21 +101,18 @@ public class ExtendedMetadata {
 			}
 			byte[] arrayMeta = nbttagcompound1.getByteArray("Meta");
 			byte[] arrayMetaExt = nbttagcompound1.hasKey("MetaExt") ? nbttagcompound1.getByteArray("MetaExt") : null;
-			int[] aint = new int[arrayBlock.length];
+			int[] data = new int[arrayBlock.length];
 
-			for(int l = 0; l < aint.length; ++l) {
+			for(int l = 0; l < data.length; ++l) {
 				int blockExt = arrayBlockExt != null ? arrayBlockExt[l] : 0;
 				int metaExt = arrayMetaExt != null ? arrayMetaExt[l] : 0;
-				aint[l] = ((blockExt & 127) << 24 | (arrayBlock[l] & 255) << 16 | (metaExt & 255) << 8 | (arrayMeta[l] & 255));
+				data[l] = ((blockExt & 127) << 24 | (arrayBlock[l] & 255) << 16 | (metaExt & 255) << 8 | (arrayMeta[l] & 255));
 			}
-			
-			// extendedblockstorage.setData(aint);
 			try {
-				setData.invoke(extendedblockstorage, aint);
+				setData.invoke(extendedblockstorage, data);
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
-			
 			extendedblockstorage.setBlocklightArray(new NibbleArray(nbttagcompound1.getByteArray("BlockLight")));
 			if(flag) {
 				extendedblockstorage.setSkylightArray(new NibbleArray(nbttagcompound1.getByteArray("SkyLight")));
@@ -132,10 +142,9 @@ public class ExtendedMetadata {
 		NBTTagList nbttaglist = new NBTTagList();
 		boolean flag = !world.provider.getHasNoSky();
 		ExtendedBlockStorage[] aextendedblockstorage1 = aextendedblockstorage;
-		int i = aextendedblockstorage.length;
 		NBTTagCompound nbttagcompound1;
 
-		for(int j = 0; j < i; ++j) {
+		for(int j = 0; j < aextendedblockstorage.length; ++j) {
 			ExtendedBlockStorage extendedblockstorage = aextendedblockstorage1[j];
 
 			if(extendedblockstorage != null) {
@@ -143,7 +152,6 @@ public class ExtendedMetadata {
 				nbttagcompound1.setByte("Y", (byte) (extendedblockstorage.getYLocation() >> 4 & 255));
 				int[] data = null;
 				try {
-					// data = extendedblockstorage.getData();
 					data = (int[]) getData.invoke(extendedblockstorage);
 				} catch(Exception e) {
 					e.printStackTrace();
@@ -198,7 +206,7 @@ public class ExtendedMetadata {
 		NBTTagList nbttaglist1 = new NBTTagList();
 		Iterator<?> iterator;
 
-		for(i = 0; i < chunk.getEntityLists().length; ++i) {
+		for(int i = 0; i < chunk.getEntityLists().length; ++i) {
 			iterator = chunk.getEntityLists()[i].iterator();
 
 			while(iterator.hasNext()) {
@@ -254,5 +262,57 @@ public class ExtendedMetadata {
 
 			nbt.setTag("TileTicks", nbttaglist3);
 		}
+	}
+
+	public static S21PacketChunkData.Extracted writeChunkToPacket(Chunk chunk, boolean sendAllChunks, boolean sendSkylight, int chunks) {
+		ExtendedBlockStorage[] aextendedblockstorage = chunk.getBlockStorageArray();
+		S21PacketChunkData.Extracted extracted = new S21PacketChunkData.Extracted();
+		ArrayList<ExtendedBlockStorage> arraylist = Lists.newArrayList();
+		
+		for(int i = 0; i < aextendedblockstorage.length; ++i) {
+			ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[i];
+
+			if(extendedblockstorage != null && (!sendAllChunks || !extendedblockstorage.isEmpty()) && (chunks & 1 << i) != 0) {
+				extracted.dataSize |= 1 << i;
+				arraylist.add(extendedblockstorage);
+			}
+		}
+		try {
+			extracted.data = new byte[(Integer) func_180737_a.invoke(null, Integer.bitCount(extracted.dataSize), sendSkylight, sendAllChunks)];
+			int i = 0;
+			Iterator<ExtendedBlockStorage> iterator = arraylist.iterator();
+			ExtendedBlockStorage extendedblockstorage1;
+	
+			while(iterator.hasNext()) {
+				extendedblockstorage1 = (ExtendedBlockStorage) iterator.next();
+				int[] data = null;
+				try {
+					data = (int[]) getData.invoke(extendedblockstorage1);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}			
+				int[] aint1 = data;
+				int k = data.length;
+				for(int l = 0; l < k; ++l) {
+					int c0 = aint1[l];
+					extracted.data[i++] = (byte) (c0 & 255);
+					extracted.data[i++] = (byte) (c0 >> 8 & 255);
+				}
+			}
+			for(iterator = arraylist.iterator(); iterator.hasNext(); i = (Integer) func_179757_a.invoke(null, extendedblockstorage1.getBlocklightArray().getData(), extracted.data, i)) {
+				extendedblockstorage1 = (ExtendedBlockStorage) iterator.next();
+			}
+			if(sendSkylight) {
+				for(iterator = arraylist.iterator(); iterator.hasNext(); i = (Integer) func_179757_a.invoke(null, extendedblockstorage1.getSkylightArray().getData(), extracted.data, i)) {
+					extendedblockstorage1 = (ExtendedBlockStorage) iterator.next();
+				}
+			}
+			if(sendAllChunks) {
+				i = (Integer) func_179757_a.invoke(null, chunk.getBiomeArray(), extracted.data, i);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return extracted;
 	}
 }
