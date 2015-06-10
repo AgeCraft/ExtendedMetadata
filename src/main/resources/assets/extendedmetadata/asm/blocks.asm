@@ -76,19 +76,9 @@ IOR
 ISTORE 17
 
 list registerBlocks
-GETSTATIC net/minecraft/block/Block.blockRegistry : Lnet/minecraft/util/RegistryNamespacedDefaultedByKey;
-ALOAD 14
-INVOKEVIRTUAL net/minecraft/util/RegistryNamespacedDefaultedByKey.getIDForObject (Ljava/lang/Object;)I
-LDC 32767
-IAND
-BIPUSH 16
-ISHL
 ALOAD 14
 ALOAD 16
-INVOKEVIRTUAL net/minecraft/block/Block.getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I
-LDC 65535
-IAND
-IOR
+INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.getIDFromState (Lnet/minecraft/block/Block;Lnet/minecraft/block/state/IBlockState;)I
 ISTORE 17
 
 # net.minecraft.client.renderer.RenderGlobal

@@ -48,13 +48,13 @@ Replaced by `void ExtendedMetadata.writeChunkToNBT(Chunk, World, NBTTagCompound)
 
 #### net.minecraft.block.Block
 ##### Method: `int getStateId(IBlockState)`
-Replaced by `int ExtendedMetadata.getStateFromID(IBlockState)` to change how block states are formed.
+Replaced by `int ExtendedMetadata.getIDFromState(IBlockState)` to change how block states are formed.
 
 ##### Method: `IBlockState getStateById(int)`
-Replaced by `IBlockState ExtendedMetadata.getStateById(int)` to change how block states are formed.
+Replaced by `IBlockState ExtendedMetadata.getStateFromID(int)` to change how block states are formed.
 
-#### Method: `void registerBlocks()`
-Changed the last lines to change how block states are formed from block IDs and metadata
+##### Method: `void registerBlocks()`
+The last lines are replaced by `int ExtendedMetadata.getIDFromState(Block, IBlockState)` to change how block states are formed.
 
 #### net.minecraft.network.play.server.S21PacketChunkData
 ##### Method: `int func_180737_a(int, boolean, boolean)`
@@ -109,3 +109,6 @@ Change value from `4096` to `32768`
 
 ##### Field: `MAX_ITEM_ID`
 Change value from `31999` to `65535`
+
+##### Method: `int registerBlock(Block, String, int)`
+The last lines are replaced by `int ExtendedMetadata.getIDFromState(int, IBlockState)` to change how block states are formed.

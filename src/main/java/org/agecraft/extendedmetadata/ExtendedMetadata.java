@@ -76,6 +76,10 @@ public class ExtendedMetadata {
 	public static int getIDFromState(IBlockState state) {
 		return getIDFromState(Block.getIdFromBlock(state.getBlock()), state);
 	}
+	
+	public static int getIDFromState(Block block, IBlockState state) {
+		return getIDFromState(Block.getIdFromBlock(block), state);
+	}
 
 	public static int getIDFromState(int blockID, IBlockState state) {
 		return ((blockID & 32767) << 16) | (state.getBlock().getMetaFromState(state) & 65535);
