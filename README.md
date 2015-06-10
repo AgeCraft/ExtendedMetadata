@@ -24,8 +24,8 @@ For those that are curious how this mod was made: I forked Minecraft Forge and s
 ## Changes
 The changes made by the ASM transformer are listed below. Useful in the future as reference for updating to another Minecraft version or updating Forge changes.
 
-### net.minecraft.world.chunk.storage.ExtendedBlockStorage
-#### Field: `data`
+#### net.minecraft.world.chunk.storage.ExtendedBlockStorage
+##### Field: `data`
 Change type from `char[]` to `int[]`. Affected methods: 
 * `void <init>(int, boolean)`
 * `IBlockState get(int, int, int)`
@@ -33,79 +33,79 @@ Change type from `char[]` to `int[]`. Affected methods:
 * `char[] getData()`
 * `void setData(char[])`
 
-#### Method: `char[] getData()`
+##### Method: `char[] getData()`
 Change return type from `char[]` to `int[]`.
 
-#### Method: `void setData(char[])`
+##### Method: `void setData(char[])`
 Change parameter type from `char[]` to `int[]`.
 
-### net.minecraft.world.chunk.storage.AnvilChunkLoader
-#### Method: `Chunk readChunkFromNBT(World, NBTTagCompound)`
+#### net.minecraft.world.chunk.storage.AnvilChunkLoader
+##### Method: `Chunk readChunkFromNBT(World, NBTTagCompound)`
 Replaced by `Chunk ExtendedMetadata.readChunkFromNBT(World, NBTTagCompound)` to change block state storage from 2 bytes to 4 bytes.
 
-#### Method: `void writeChunkToNBT(Chunk, World, NBTTagCompound)`
+##### Method: `void writeChunkToNBT(Chunk, World, NBTTagCompound)`
 Replaced by `void ExtendedMetadata.writeChunkToNBT(Chunk, World, NBTTagCompound)` to change block state storage from 2 bytes to 4 bytes.
 
-### net.minecraft.block.Block
-#### Method: `int getStateId(IBlockState)`
+#### net.minecraft.block.Block
+##### Method: `int getStateId(IBlockState)`
 Replaced by `int ExtendedMetadata.getStateFromID(IBlockState)` to change how block states are formed.
 
-#### Method: `IBlockState getStateById(int)`
+##### Method: `IBlockState getStateById(int)`
 Replaced by `IBlockState ExtendedMetadata.getStateById(int)` to change how block states are formed.
 
 #### Method: `void registerBlocks()`
 Changed the last lines to change how block states are formed from block IDs and metadata
 
-### net.minecraft.network.play.server.S21PacketChunkData
-#### Method: `int func_180737_a(int, boolean, boolean)`
+#### net.minecraft.network.play.server.S21PacketChunkData
+##### Method: `int func_180737_a(int, boolean, boolean)`
 Changed the calculation of the byte array size to support 4 bytes for block states
 
-#### Method: `S21PacketChunkData.Extracted func_179756_a(Chunk, boolean, boolean, int)`
+##### Method: `S21PacketChunkData.Extracted func_179756_a(Chunk, boolean, boolean, int)`
 Replaced by `S21PacketChunkData.Extracted ExtendedMetadata.writeChunkToPacket(Chunk, boolean, boolean, int)` to change how the packet handles block states. Writes 4 bytes instead of 2 bytes per block state.
 
-### net.minecraft.client.renderer.RenderGlobal
-#### Method: `void playAusSFX(EntityPlayer, int, BlockPos, int)` *CLIENT SIDE ONLY*
+#### net.minecraft.client.renderer.RenderGlobal
+##### Method: `void playAusSFX(EntityPlayer, int, BlockPos, int)` *CLIENT SIDE ONLY*
 Changed reading block ID and metadata from the block state
 
-### net.minecraft.world.chunk.Chunk
-#### Method: `void fillChunk(byte[], boolean, int)` *CLIENT SIDE ONLY*
+#### net.minecraft.world.chunk.Chunk
+##### Method: `void fillChunk(byte[], boolean, int)` *CLIENT SIDE ONLY*
 Replaced by `void ExtendedMetadata.writeChunkToPacket(Chunk, byte[], boolean, int)` to change how the packet handles block states. Writes 4 bytes instead of 2 bytes per block state.
 
-### net.minecraft.world.chunk.ChunkPrimer
-#### Field: `data`
+#### net.minecraft.world.chunk.ChunkPrimer
+##### Field: `data`
 Change type from `short[]` to `int[]`. Affected methods:
 * `void <init>()`
 * `IBlockState getBlockState(int)`
 * `void setBlockState(int, IBlockState)`
 
-### net.minecarft.stats.StatList
-#### Field: `mineBlockStatArray`
+#### net.minecarft.stats.StatList
+##### Field: `mineBlockStatArray`
 Change array size from `4096` to `32768`.
 
-#### Field: `objectCraftStats`
+##### Field: `objectCraftStats`
 Change array size from `32000` to `65536`
 
-#### Field: `objectUseStats`
+##### Field: `objectUseStats`
 Change array size from `32000` to `65536`
 
-#### Field: `objectBreakStats`
+##### Field: `objectBreakStats`
 Change array size from `32000` to `65536`
 
-### net.minecraft.util.ObjectIntIdentityMap
-#### Field: `identityMap`
+#### net.minecraft.util.ObjectIntIdentityMap
+##### Field: `identityMap`
 Changed initial size from `512` to `8192`.
 The new size is quite random, but should prevent frequent resizing.
 
-#### Field: `objectList`
+##### Field: `objectList`
 Changed initial size from nothing to `8192`.
 The new size is quite random, but should prevent frequent resizing.
 
-### net.minecraftforge.fml.common.registry.GameData
-#### Field: `MAX_BLOCK_ID`
+#### net.minecraftforge.fml.common.registry.GameData
+##### Field: `MAX_BLOCK_ID`
 Change value from `4095` to `32767`
 
-#### Field: `MIN_ITEM_ID`
+##### Field: `MIN_ITEM_ID`
 Change value from `4096` to `32768`
 
-#### Field: `MAX_ITEM_ID`
+##### Field: `MAX_ITEM_ID`
 Change value from `31999` to `65535`
