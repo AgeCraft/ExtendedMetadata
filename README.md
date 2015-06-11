@@ -11,6 +11,10 @@ So that's why this mod only fully increases block metadata and not block IDs, be
 
 For those that are curious how this mod was made: I forked Minecraft Forge and setup the contributor environment (https://github.com/MinecraftForge/MinecraftForge/wiki/If-you-want-to-contribute-to-Forge) and started looking through the decompiled Minecraft code to get an idea of the internals of block states, chunk storage and chunk networking. While I was making changes to the source code I wrote down all the fields and/or methods I changed. This simplified making the coremod because I already knew where to change what, all that was left todo was search the corresponding bytecode and setup the ASM transformations for it. This is quite a tedious process, but CodeChickenLib/CodeChickenCore and the Bytecode Outline plugin for Eclipse (http://marketplace.eclipse.org/content/bytecode-outline) helped a lot.
 
+## Warning
+This increases the amount of disk storage and network bandwidth being used. This in can cause lag, you have been warned.
+Also be careful with the 1.8 model / texture loader, using too much metadata can cause out of memory errors. The solution for this is a custom model or texture loader, we are working on implementing something like that, but it might take some time to perfect.
+
 ## Dependencies
 * [Minecraft Forge](http://minecraftforge.net) 11.14.1.1419 or higher
 * [CodeChickenCore](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.0.5.34 or higher
