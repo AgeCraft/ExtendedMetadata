@@ -76,7 +76,7 @@ processResources {
 }
 
 def commonManifest = {
-    attributes 'FMLCorePlugin': 'org.agecraft.extendedmetadata.asm.MECorePlugin'
+    attributes 'FMLCorePlugin': 'org.agecraft.extendedmetadata.asm.EMCorePlugin'
 }
 
 jar {
