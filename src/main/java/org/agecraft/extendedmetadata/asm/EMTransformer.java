@@ -170,7 +170,6 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		
-		// ChunkPrimer.data
 		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "field_177860_a", "[S"), "[I"));
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
 			@Override
@@ -192,7 +191,6 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		// ChunkPrimer.getBlockState
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "func_177858_a", "(I)Lnet/minecraft/block/state/IBlockState;")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -210,8 +208,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		// ChunkPrimer.setBlockState
-		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "func_177858_a", "(ILnet/minecraft/block/state/IBlockState;)V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "func_177857_a", "(ILnet/minecraft/block/state/IBlockState;)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
