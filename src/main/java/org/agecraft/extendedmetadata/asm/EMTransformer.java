@@ -48,7 +48,7 @@ public class EMTransformer implements IClassTransformer {
 						}
 					} else if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					}
@@ -63,7 +63,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.CALOAD) {
@@ -80,7 +80,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.I2C) {
@@ -100,7 +100,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					}
@@ -121,7 +121,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					} 
@@ -185,7 +185,7 @@ public class EMTransformer implements IClassTransformer {
 						}
 					} else if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a")) && fieldInsn.desc.equals("[S")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
 						}
 					}
@@ -201,7 +201,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a")) && fieldInsn.desc.equals("[S")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.SALOAD) {
@@ -219,7 +219,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a")) && fieldInsn.desc.equals("[S")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.I2S) {
