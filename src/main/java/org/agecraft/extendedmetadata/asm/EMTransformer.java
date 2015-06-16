@@ -34,7 +34,7 @@ public class EMTransformer implements IClassTransformer {
 	private Map<String, ASMBlock> asmblocks = ASMReader.loadResource("/assets/extendedmetadata/asm/blocks.asm");
 	
 	public EMTransformer() {
-		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "data", "[C"), "[I"));
+		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "field_177488_d", "[C"), "[I"));
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "<init>", "(IZ)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -48,14 +48,14 @@ public class EMTransformer implements IClassTransformer {
 						}
 					} else if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					}
 				}
 			}
 		});
-		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "get", "(III)Lnet/minecraft/block/state/IBlockState;")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177485_a", "(III)Lnet/minecraft/block/state/IBlockState;")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -63,7 +63,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.CALOAD) {
@@ -72,7 +72,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "set", "(IIILnet/minecraft/block/state/IBlockState;)V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177484_a", "(IIILnet/minecraft/block/state/IBlockState;)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -80,7 +80,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.I2C) {
@@ -91,7 +91,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "getData", "()[C")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177487_g", "()[C")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				methodNode.desc = "()[I";
@@ -100,14 +100,14 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					}
 				}
 			}
 		});
-		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "setData", "([C)V")) {
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177486_a", "([C)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				methodNode.desc = "([I)V";
@@ -121,7 +121,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[C")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
 					} 
@@ -170,7 +170,8 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		
-		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "data", "[S"), "[I"));
+		// ChunkPrimer.data
+		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "field_177860_a", "[S"), "[I"));
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -184,14 +185,15 @@ public class EMTransformer implements IClassTransformer {
 						}
 					} else if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[S")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
 						}
 					}
 				}
 			}
 		});
-		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "getBlockState", "(I)Lnet/minecraft/block/state/IBlockState;")) {
+		// ChunkPrimer.getBlockState
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "func_177858_a", "(I)Lnet/minecraft/block/state/IBlockState;")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -199,7 +201,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[S")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.SALOAD) {
@@ -208,7 +210,8 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "setBlockState", "(ILnet/minecraft/block/state/IBlockState;)V")) {
+		// ChunkPrimer.setBlockState
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "func_177858_a", "(ILnet/minecraft/block/state/IBlockState;)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -216,7 +219,7 @@ public class EMTransformer implements IClassTransformer {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.GETFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
-						if(fieldInsn.name.equals("data") && fieldInsn.desc.equals("[S")) {
+						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
 						}
 					} else if(insn.getOpcode() == Opcodes.I2S) {
@@ -269,9 +272,9 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		
-		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "getStateId", "(Lnet/minecraft/block/state/IBlockState;)I"), asmblocks.get("getStateId")));
-		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "getStateById", "(I)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("getStateById")));
+
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "func_176210_f", "(Lnet/minecraft/block/state/IBlockState;)I"), asmblocks.get("getStateId")));
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "func_176220_d", "(I)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("getStateById")));
 		
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
 			@Override
@@ -288,16 +291,16 @@ public class EMTransformer implements IClassTransformer {
 		});
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;"), asmblocks.get("writeChunkToPacket")));
 		
-		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "readChunkFromNBT", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;"), asmblocks.get("readChunkFromNBT")));
-		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "writeChunkToNBT", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V"), asmblocks.get("writeChunkToNBT")));
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "func_75823_a", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;"), asmblocks.get("readChunkFromNBT")));
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "func_75820_a", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V"), asmblocks.get("writeChunkToNBT")));
 
-		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "registerBlocks", "()V"), asmblocks.get("old_registerBlocks"), asmblocks.get("registerBlocks")));
+		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "func_149671_p", "()V"), asmblocks.get("old_registerBlocks"), asmblocks.get("registerBlocks")));
 		
 		if(FMLLaunchHandler.side().isClient()) {
-			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/Chunk", "fillChunk", "([BIZ)V"), asmblocks.get("readChunkFromPacket")));
+			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/Chunk", "func_177439_a", "([BIZ)V"), asmblocks.get("readChunkFromPacket")));
 			
-			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "playAusSFX", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_1"), asmblocks.get("playAusSFX_1")));
-			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "playAusSFX", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_2"), asmblocks.get("playAusSFX_2")));
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_1"), asmblocks.get("playAusSFX_1")));
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_2"), asmblocks.get("playAusSFX_2")));
 		}
 	}
 

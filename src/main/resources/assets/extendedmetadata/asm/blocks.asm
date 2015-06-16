@@ -18,7 +18,7 @@ ICONST_4
 ISHL
 ALOAD 1
 ALOAD 7
-INVOKEVIRTUAL net/minecraft/block/Block.getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I
+INVOKEVIRTUAL net/minecraft/block/Block.func_176201_c (Lnet/minecraft/block/state/IBlockState;)I
 IOR
 INVOKEVIRTUAL net/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap.put (Ljava/lang/Object;I)V
 
@@ -64,14 +64,14 @@ RETURN
 
 # net.minecraft.block.Block
 list old_registerBlocks
-GETSTATIC net/minecraft/block/Block.blockRegistry : Lnet/minecraft/util/RegistryNamespacedDefaultedByKey;
+GETSTATIC net/minecraft/block/Block.field_149771_c : Lnet/minecraft/util/RegistryNamespacedDefaultedByKey;
 ALOAD 14
-INVOKEVIRTUAL net/minecraft/util/RegistryNamespacedDefaultedByKey.getIDForObject (Ljava/lang/Object;)I
+INVOKEVIRTUAL net/minecraft/util/RegistryNamespacedDefaultedByKey.func_148757_b (Ljava/lang/Object;)I
 ICONST_4
 ISHL
 ALOAD 14
 ALOAD 16
-INVOKEVIRTUAL net/minecraft/block/Block.getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I
+INVOKEVIRTUAL net/minecraft/block/Block.func_176201_c (Lnet/minecraft/block/state/IBlockState;)I
 IOR
 ISTORE 17
 
@@ -86,7 +86,7 @@ list old_playAusSFX_1
 ILOAD 4
 SIPUSH 4095
 IAND
-INVOKESTATIC net/minecraft/block/Block.getBlockById (I)Lnet/minecraft/block/Block;
+INVOKESTATIC net/minecraft/block/Block.func_149729_e (I)Lnet/minecraft/block/Block;
 
 list playAusSFX_1
 ILOAD 4
@@ -94,7 +94,7 @@ BIPUSH 16
 ISHR 16
 LDC 32767
 IAND
-INVOKESTATIC net/minecraft/block/Block.getBlockById (I)Lnet/minecraft/block/Block;
+INVOKESTATIC net/minecraft/block/Block.func_149729_e (I)Lnet/minecraft/block/Block;
 
 list old_playAusSFX_2
 ILOAD 4
@@ -102,10 +102,10 @@ BIPUSH 12
 ISHR
 SIPUSH 255
 IAND
-INVOKEVIRTUAL net/minecraft/block/Block.getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState;
+INVOKEVIRTUAL net/minecraft/block/Block.func_176203_a (I)Lnet/minecraft/block/state/IBlockState;
 
 list playAusSFX_2
 ILOAD 4
 LDC 65535
 IAND
-INVOKEVIRTUAL net/minecraft/block/Block.getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState;
+INVOKEVIRTUAL net/minecraft/block/Block.func_176203_a (I)Lnet/minecraft/block/state/IBlockState;
