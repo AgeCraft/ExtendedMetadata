@@ -1,6 +1,7 @@
 package org.agecraft.extendedmetadata;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,7 @@ import com.google.common.eventbus.Subscribe;
 public class EMModContainer extends DummyModContainer {
 
 	public EMModContainer() {
-		super(MetadataCollection.from(MetadataCollection.class.getResourceAsStream("/mcmod.info"), "ExtendedMetadata").getMetadataForId("ExtendedMetadata", null));
+		super(MetadataCollection.from(MetadataCollection.class.getResourceAsStream("/mcmod.info"), "ExtendedMetadata").getMetadataForId("ExtendedMetadata", new HashMap<String, Object>()));
 	}
 
 	@Override
