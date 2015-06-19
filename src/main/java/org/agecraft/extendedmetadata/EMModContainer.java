@@ -25,8 +25,15 @@ import com.google.common.eventbus.Subscribe;
 
 public class EMModContainer extends DummyModContainer {
 
+	public static HashMap<String, Object> map = new HashMap<String, Object>();
+	
+	static {
+		map.put("name", "ExtendedMetadata");
+		map.put("version", "@VERSION@");
+	}
+	
 	public EMModContainer() {
-		super(MetadataCollection.from(MetadataCollection.class.getResourceAsStream("/mcmod.info"), "ExtendedMetadata").getMetadataForId("ExtendedMetadata", new HashMap<String, Object>()));
+		super(MetadataCollection.from(MetadataCollection.class.getResourceAsStream("/mcmod.info"), "ExtendedMetadata").getMetadataForId("ExtendedMetadata", map));
 	}
 
 	@Override
