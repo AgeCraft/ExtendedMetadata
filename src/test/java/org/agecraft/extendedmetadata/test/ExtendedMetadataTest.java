@@ -65,7 +65,7 @@ public class ExtendedMetadataTest {
     public static class BlockExtendedMetadata extends Block {
         
         public static final String NAME = "extended_metadata";
-        public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 1023);
+        public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 300);
 
         public BlockExtendedMetadata() {
             super(Material.cloth);
@@ -124,8 +124,6 @@ public class ExtendedMetadataTest {
             list.add(new ItemStack(item, 1, 255));
             list.add(new ItemStack(item, 1, 256));
             list.add(new ItemStack(item, 1, 300));
-            list.add(new ItemStack(item, 1, 512));
-            list.add(new ItemStack(item, 1, 1023));
         }
     }
     

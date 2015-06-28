@@ -109,3 +109,8 @@ ILOAD 4
 LDC 65535
 IAND
 INVOKEVIRTUAL net/minecraft/block/Block.func_176203_a (I)Lnet/minecraft/block/state/IBlockState;
+
+# net.minecraftforge.client.model.ModelLoader
+list setupModelRegistry
+ALOAD 0
+INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.load (Lnet/minecraftforge/client/model/ModelLoader;)V;
