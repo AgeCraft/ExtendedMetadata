@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition;
-import net.minecraft.client.renderer.block.model.ModelBlockDefinition.Variant;
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition.Variants;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelRotation;
@@ -29,17 +28,25 @@ public class EMModelLoader {
 			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) field.get(loader);
 
 			ArrayList<Variants> list = new ArrayList<Variants>();
-			ArrayList<Variant> variants = new ArrayList<Variant>();
-			
-			for(int i = 0; i < 300; i++) {
+
+			for(int i = 0; i < 301; i++) {
+				ArrayList<ModelBlockDefinition.Variant> variants = new ArrayList<ModelBlockDefinition.Variant>();
+
 				IBlockState state = ExtendedMetadataTest.block.getStateFromMeta(i);
 				String properties = getPropertyString(state.getProperties());
+
+				EMVariant var = new EMVariant(getBlockLocation(ExtendedMetadataTest.MOD_ID.toLowerCase() + ":" + BlockExtendedMetadata.NAME));
+				var.textures.put("all", ExtendedMetadataTest.MOD_ID.toLowerCase() + ":blocks/" + BlockExtendedMetadata.NAME + "_" + Integer.toString(i));
 				
-				variants.add(new Variant(new ResourceLocation(ExtendedMetadataTest.MOD_ID.toLowerCase(), "block/" + BlockExtendedMetadata.NAME), ModelRotation.X0_Y0, false, 1));
-				
+				ModelRotation rot = var.getRotation().or(ModelRotation.X0_Y0);
+				boolean uvLock = var.getUvLock().or(false);
+				int weight = var.getWeight().or(1);
+
+				variants.add(new SmartVariant(var.getModel(), rot, uvLock, weight, var.getTextures(), var.getOnlyPartsVariant(), var.getCustomData()));
+
 				list.add(new Variants(properties, variants));
-			}			
-			
+			}
+
 			map.put(new ResourceLocation(ExtendedMetadataTest.MOD_ID.toLowerCase(), "blockstates/" + BlockExtendedMetadata.NAME + ".json"), new ModelBlockDefinition((Collection) list));
 
 			field.set(loader, map);
@@ -72,5 +79,10 @@ public class EMModelLoader {
 		}
 
 		return stringbuilder.toString();
+	}
+
+	public static ResourceLocation getBlockLocation(String location) {
+		ResourceLocation tmp = new ResourceLocation(location);
+		return new ResourceLocation(tmp.getResourceDomain(), "block/" + tmp.getResourcePath());
 	}
 }
