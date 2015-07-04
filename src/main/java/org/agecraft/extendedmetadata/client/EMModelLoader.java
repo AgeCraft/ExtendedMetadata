@@ -37,7 +37,7 @@ public class EMModelLoader {
 
 				EMVariant var = new EMVariant(getBlockLocation(ExtendedMetadataTest.MOD_ID.toLowerCase() + ":" + BlockExtendedMetadata.NAME));
 				var.textures.put("all", ExtendedMetadataTest.MOD_ID.toLowerCase() + ":blocks/" + BlockExtendedMetadata.NAME + "_" + Integer.toString(i));
-				
+
 				ModelRotation rot = var.getRotation().or(ModelRotation.X0_Y0);
 				boolean uvLock = var.getUvLock().or(false);
 				int weight = var.getWeight().or(1);

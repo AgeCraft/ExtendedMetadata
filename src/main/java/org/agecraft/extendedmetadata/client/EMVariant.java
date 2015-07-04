@@ -32,7 +32,7 @@ public class EMVariant {
 		this.model = model;
 		this.modelSet = true;
 	}
-	
+
 	public EMVariant(ResourceLocation model, ModelRotation rotation, boolean uvLock, int weight) {
 		this(model);
 		this.rotation = Optional.of(rotation);
@@ -102,7 +102,7 @@ public class EMVariant {
 					for(EMVariant v : variants) {
 						newVariants.add(new EMVariant(v));
 					}
-					
+
 					output.put(key, newVariants);
 				} else {
 					output.put(key, variants);
@@ -122,7 +122,7 @@ public class EMVariant {
 
 			for(Entry<String, List<EMVariant>> entry : submodels.entrySet()) {
 				List<EMVariant> part = entry.getValue();
-				
+
 				if(part != null) {
 					if(part.size() == 1) {
 						builder.put(entry.getKey(), part.get(0).asGenericSubModel());
@@ -148,7 +148,7 @@ public class EMVariant {
 	public Optional<ModelRotation> getRotation() {
 		return rotation;
 	}
-	
+
 	public void setRotation(ModelRotation value) {
 		rotation = Optional.of(value);
 	}
@@ -156,7 +156,7 @@ public class EMVariant {
 	public Optional<Boolean> getUvLock() {
 		return uvLock;
 	}
-	
+
 	public void setUvLock(boolean value) {
 		uvLock = Optional.of(value);
 	}
@@ -168,7 +168,7 @@ public class EMVariant {
 	public void setWeight(int value) {
 		weight = Optional.of(value);
 	}
-	
+
 	public ImmutableMap<String, String> getTextures() {
 		return ImmutableMap.copyOf(textures);
 	}

@@ -26,12 +26,12 @@ import com.google.common.eventbus.Subscribe;
 public class EMModContainer extends DummyModContainer {
 
 	public static HashMap<String, Object> map = new HashMap<String, Object>();
-	
+
 	static {
 		map.put("name", "ExtendedMetadata");
 		map.put("version", "@VERSION@");
 	}
-	
+
 	public EMModContainer() {
 		super(MetadataCollection.from(MetadataCollection.class.getResourceAsStream("/mcmod.info"), "ExtendedMetadata").getMetadataForId("ExtendedMetadata", map));
 	}
@@ -63,7 +63,7 @@ public class EMModContainer extends DummyModContainer {
 	public Class<?> getCustomResourcePackClass() {
 		return getSource().isDirectory() ? FMLFolderResourcePack.class : FMLFileResourcePack.class;
 	}
-	
+
 	@Subscribe
 	public void preInit(FMLPreInitializationEvent event) {
 		ExtendedMetadata.init();

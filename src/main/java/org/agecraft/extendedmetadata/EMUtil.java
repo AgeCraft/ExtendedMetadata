@@ -23,7 +23,7 @@ public class EMUtil {
 		method.setAccessible(true);
 		return method;
 	}
-	
+
 	public static Field getField(Class<?> clazz, String name, String srgName, String obfName) throws Exception {
 		Field field = null;
 		try {

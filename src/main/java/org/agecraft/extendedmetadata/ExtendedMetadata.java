@@ -30,7 +30,7 @@ public class ExtendedMetadata {
 
 	public static Method getData;
 	public static Method setData;
-	
+
 	public static Field chunkWorldObj;
 	public static Field chunkStorageArrays;
 	public static Field chunkTileEntityMap;
@@ -56,7 +56,7 @@ public class ExtendedMetadata {
 			if(FMLLaunchHandler.side().isClient()) {
 				chunkGenerateHeightMap = EMUtil.getMethod(Chunk.class, "generateHeightMap", "func_76590_a", "a");
 			}
-			
+
 			func_180737_a = EMUtil.getMethod(S21PacketChunkData.class, "func_180737_a", "func_180737_a", "a", int.class, boolean.class, boolean.class);
 			func_179757_a = EMUtil.getMethod(S21PacketChunkData.class, "func_179757_a", "func_179757_a", "a", byte[].class, byte[].class, int.class);
 		} catch(Exception e) {
@@ -67,7 +67,7 @@ public class ExtendedMetadata {
 	public static int getIDFromState(IBlockState state) {
 		return getIDFromState(Block.getIdFromBlock(state.getBlock()), state);
 	}
-	
+
 	public static int getIDFromState(Block block, IBlockState state) {
 		return getIDFromState(Block.getIdFromBlock(block), state);
 	}
