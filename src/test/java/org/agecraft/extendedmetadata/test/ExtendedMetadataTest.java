@@ -25,8 +25,9 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import org.agecraft.extendedmetadata.BlockMetadata;
 import org.agecraft.extendedmetadata.ItemBlockMetadata;
+import org.agecraft.extendedmetadata.client.EMModelLoader;
 
-@Mod(modid = ExtendedMetadataTest.MOD_ID, version = ExtendedMetadataTest.VERSION)
+@Mod(modid = ExtendedMetadataTest.MOD_ID, name = ExtendedMetadataTest.MOD_ID, version = ExtendedMetadataTest.VERSION)
 public class ExtendedMetadataTest {
 
 	public static final String MOD_ID = "ExtendedMetadataTest";
@@ -60,7 +61,7 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public void init() {
-
+			EMModelLoader.registerBlock(block);
 		}
 	}
 
@@ -71,11 +72,11 @@ public class ExtendedMetadataTest {
 
 		public BlockExtendedMetadata() {
 			super(Material.cloth, 301);
-			setCreativeTab(CreativeTabs.tabBlock);
 			setUnlocalizedName(MOD_ID.toLowerCase() + ":" + NAME);
 			setDefaultState(blockState.getBaseState().withProperty(VALUE, 0));
 			setHardness(0.8F);
 			setStepSound(Block.soundTypeCloth);
+			setCreativeTab(CreativeTabs.tabBlock);
 		}
 
 		@Override

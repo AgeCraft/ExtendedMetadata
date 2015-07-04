@@ -36,10 +36,11 @@ public class SmartVariant extends ModelBlockDefinition.Variant implements ISmart
 
 	public IModel runModelHooks(IModel base, ImmutableMap<String, String> textureMap, ImmutableMap<String, String> customData) {
 		if(!customData.isEmpty()) {
-			if(base instanceof IModelCustomData)
+			if(base instanceof IModelCustomData) {
 				base = ((IModelCustomData) base).process(customData);
-			else
+			} else {
 				throw new RuntimeException("Attempted to add custom data to a model that doesn't need it: " + base);
+			}
 		}
 		if(!textureMap.isEmpty()) {
 			if(base instanceof IRetexturableModel) {
@@ -87,5 +88,4 @@ public class SmartVariant extends ModelBlockDefinition.Variant implements ISmart
 		}
 		return buf.toString();
 	}
-
 }

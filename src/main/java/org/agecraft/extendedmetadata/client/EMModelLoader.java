@@ -1,88 +1,153 @@
 package org.agecraft.extendedmetadata.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockState.StateImplementation;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition;
+import net.minecraft.client.renderer.block.model.ModelBlockDefinition.Variant;
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition.Variants;
+import net.minecraft.client.resources.IResource;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.ForgeBlockStateV1;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fml.common.registry.GameData;
 
 import org.agecraft.extendedmetadata.EMUtil;
-import org.agecraft.extendedmetadata.test.ExtendedMetadataTest;
-import org.agecraft.extendedmetadata.test.ExtendedMetadataTest.BlockExtendedMetadata;
+import org.apache.commons.io.IOUtils;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class EMModelLoader {
 
+	public static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(EMBlockState.class, EMBlockState.Deserializer.INSTANCE).registerTypeAdapter(ForgeBlockStateV1.Variant.class, EMBlockState.Deserializer.FORGE_INSTANCE).create();
+
+	private static Field blockDefinitions;
+	private static Method createBlockState;
+
+	private static HashMap<Block, ResourceLocation> blocks = Maps.newHashMap();
+
+	public static void registerBlock(Block block) {
+		registerBlock(block, (ResourceLocation) GameData.getBlockRegistry().getNameForObject(block));
+	}
+
+	public static void registerBlock(Block block, String name) {
+		ResourceLocation tmp = new ResourceLocation(name);
+		registerBlock(block, new ResourceLocation(tmp.getResourceDomain(), "blockstates/" + tmp.getResourcePath()));
+	}
+
+	public static void registerBlock(Block block, ResourceLocation location) {
+		blocks.put(block, location);
+	}
+
+	public static void unregisterBlock(Block block) {
+		blocks.remove(block);
+	}
+
 	public static void load(ModelLoader loader) {
 		try {
-			Field field = EMUtil.getField(ModelBakery.class, "blockDefinitions", "field_177614_t", "t");
-			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) field.get(loader);
+			createBlockState = EMUtil.getMethod(Block.class, "createBlockState", "func_180661_e", "e");
 
-			ArrayList<Variants> list = new ArrayList<Variants>();
+			blockDefinitions = EMUtil.getField(ModelBakery.class, "blockDefinitions", "field_177614_t", "t");
+			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) blockDefinitions.get(loader);
 
-			for(int i = 0; i < 301; i++) {
-				ArrayList<ModelBlockDefinition.Variant> variants = new ArrayList<ModelBlockDefinition.Variant>();
+			IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
 
-				IBlockState state = ExtendedMetadataTest.block.getStateFromMeta(i);
-				String properties = getPropertyString(state.getProperties());
+			for(Entry<Block, ResourceLocation> entry : blocks.entrySet()) {
+				Iterator<IResource> iterator = resourceManager.getAllResources(entry.getValue()).iterator();
 
-				EMVariant var = new EMVariant(getBlockLocation(ExtendedMetadataTest.MOD_ID.toLowerCase() + ":" + BlockExtendedMetadata.NAME));
-				var.textures.put("all", ExtendedMetadataTest.MOD_ID.toLowerCase() + ":blocks/" + BlockExtendedMetadata.NAME + "_" + Integer.toString(i));
+				while(iterator.hasNext()) {
+					IResource resource = (IResource) iterator.next();
+					InputStream inputstream = null;
+					try {
+						inputstream = resource.getInputStream();
+						Reader reader = new InputStreamReader(inputstream, Charsets.UTF_8);
+						byte[] data = IOUtils.toByteArray(reader);
+						reader = new InputStreamReader(new ByteArrayInputStream(data), Charsets.UTF_8);
 
-				ModelRotation rot = var.getRotation().or(ModelRotation.X0_Y0);
-				boolean uvLock = var.getUvLock().or(false);
-				int weight = var.getWeight().or(1);
-
-				variants.add(new SmartVariant(var.getModel(), rot, uvLock, weight, var.getTextures(), var.getOnlyPartsVariant(), var.getCustomData()));
-
-				list.add(new Variants(properties, variants));
+						EMBlockState blockState = GSON.fromJson(reader, EMBlockState.class);
+						map.put(entry.getValue(), loadModelBlockDefinition(entry.getKey(), blockState));
+					} catch(Exception e) {
+						throw new RuntimeException("Encountered an exception when loading model definition of \'" + entry.getValue() + "\' from: \'" + resource.getResourceLocation() + "\' in resourcepack: \'" + resource.getResourcePackName() + "\'", e);
+					} finally {
+						IOUtils.closeQuietly(inputstream);
+					}
+				}
 			}
 
-			map.put(new ResourceLocation(ExtendedMetadataTest.MOD_ID.toLowerCase(), "blockstates/" + BlockExtendedMetadata.NAME + ".json"), new ModelBlockDefinition((Collection) list));
-
-			field.set(loader, map);
-
+			blockDefinitions.set(loader, map);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static String getPropertyString(Map map) {
-		StringBuilder stringbuilder = new StringBuilder();
-		Iterator iterator = map.entrySet().iterator();
+	private static ModelBlockDefinition loadModelBlockDefinition(Block block, EMBlockState blockState) throws Exception {
+		ImmutableList<StateImplementation> states = ((BlockState) createBlockState.invoke(block)).getValidStates();
 
-		while(iterator.hasNext()) {
-			Entry entry = (Entry) iterator.next();
+		blockState.load(block, states);
 
-			if(stringbuilder.length() != 0) {
-				stringbuilder.append(",");
+		ArrayList<Variants> list = Lists.newArrayList();
+
+		for(Entry<String, Collection<ForgeBlockStateV1.Variant>> entry : blockState.actualVariants.asMap().entrySet()) {
+			ArrayList<Variant> variants = new ArrayList<Variant>();
+
+			for(ForgeBlockStateV1.Variant variant : entry.getValue()) {
+				ModelRotation rotation = variant.getRotation().or(ModelRotation.X0_Y0);
+				boolean uvLock = variant.getUvLock().or(false);
+				int weight = variant.getWeight().or(1);
+
+				if(variant.getModel() != null && variant.getSubmodels().size() == 0 && variant.getTextures().size() == 0) {
+					variants.add(new Variant(variant.getModel(), rotation, uvLock, weight));
+				} else {
+					variants.add(new SmartVariant(variant.getModel(), rotation, uvLock, weight, variant.getTextures(), variant.getOnlyPartsVariant(), variant.getCustomData()));
+				}
 			}
-
-			IProperty iproperty = (IProperty) entry.getKey();
-			Comparable comparable = (Comparable) entry.getValue();
-			stringbuilder.append(iproperty.getName());
-			stringbuilder.append("=");
-			stringbuilder.append(iproperty.getName(comparable));
+			list.add(new Variants(entry.getKey(), variants));
 		}
 
-		if(stringbuilder.length() == 0) {
-			stringbuilder.append("normal");
-		}
-
-		return stringbuilder.toString();
+		return new ModelBlockDefinition((Collection) list);
 	}
 
-	public static ResourceLocation getBlockLocation(String location) {
-		ResourceLocation tmp = new ResourceLocation(location);
-		return new ResourceLocation(tmp.getResourceDomain(), "block/" + tmp.getResourcePath());
+	public static String getPropertyString(Map<IProperty, Comparable> map) {
+		StringBuilder builder = new StringBuilder();
+
+		for(Entry<IProperty, Comparable> entry : map.entrySet()) {
+			if(builder.length() != 0) {
+				builder.append(",");
+			}
+
+			IProperty property = (IProperty) entry.getKey();
+			Comparable comparable = (Comparable) entry.getValue();
+			builder.append(property.getName());
+			builder.append("=");
+			builder.append(property.getName(comparable));
+		}
+
+		if(builder.length() == 0) {
+			builder.append("normal");
+		}
+		return builder.toString();
 	}
 }

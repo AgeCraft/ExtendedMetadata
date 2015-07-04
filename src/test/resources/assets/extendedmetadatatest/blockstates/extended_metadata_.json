@@ -1,5 +1,4 @@
 {
-	"forge_marker": 100,
 	"variants": {
 		"value={0},type={1}": {
 			"textures": {
