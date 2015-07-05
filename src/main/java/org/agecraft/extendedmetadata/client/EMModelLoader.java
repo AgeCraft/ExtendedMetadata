@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -46,16 +47,20 @@ public class EMModelLoader {
 
 	private static Field blockDefinitions;
 	private static Method createBlockState;
+	protected static Method getSubmodelPermutations;
+	protected static Constructor<ForgeBlockStateV1.Variant> constructor;
+	protected static Method sync;
 
 	private static HashMap<Block, ResourceLocation> blocks = Maps.newHashMap();
-
+	
 	public static void registerBlock(Block block) {
-		registerBlock(block, (ResourceLocation) GameData.getBlockRegistry().getNameForObject(block));
+		ResourceLocation tmp = (ResourceLocation) GameData.getBlockRegistry().getNameForObject(block);
+		registerBlock(block, new ResourceLocation(tmp.getResourceDomain(), "blockstates/" + tmp.getResourcePath() + ".json"));
 	}
 
 	public static void registerBlock(Block block, String name) {
 		ResourceLocation tmp = new ResourceLocation(name);
-		registerBlock(block, new ResourceLocation(tmp.getResourceDomain(), "blockstates/" + tmp.getResourcePath()));
+		registerBlock(block, new ResourceLocation(tmp.getResourceDomain(), "blockstates/" + tmp.getResourcePath() + ".json"));
 	}
 
 	public static void registerBlock(Block block, ResourceLocation location) {
@@ -67,9 +72,13 @@ public class EMModelLoader {
 	}
 
 	public static void load(ModelLoader loader) {
+		System.out.println("LOAD MODELS");
 		try {
 			createBlockState = EMUtil.getMethod(Block.class, "createBlockState", "func_180661_e", "e");
-
+			getSubmodelPermutations = EMUtil.getMethod(ForgeBlockStateV1.Deserializer.class, "getSubmodelPermutations", "getSubmodelPermutations", "getSubmodelPermutations", ForgeBlockStateV1.Variant.class, Map.class);
+			constructor = EMUtil.getConstructor(ForgeBlockStateV1.Variant.class, ForgeBlockStateV1.Variant.class);
+			sync = EMUtil.getMethod(ForgeBlockStateV1.Variant.class, "sync", "sync", "sync", ForgeBlockStateV1.Variant.class);
+			
 			blockDefinitions = EMUtil.getField(ModelBakery.class, "blockDefinitions", "field_177614_t", "t");
 			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) blockDefinitions.get(loader);
 

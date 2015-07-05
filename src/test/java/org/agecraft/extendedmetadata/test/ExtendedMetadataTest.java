@@ -4,22 +4,25 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
@@ -43,16 +46,13 @@ public class ExtendedMetadataTest {
 		block = new BlockExtendedMetadata();
 
 		GameRegistry.registerBlock(block, ItemBlockMetadata.class, BlockExtendedMetadata.NAME);
-	}
-
-	@EventHandler
-	public void init(FMLInitializationEvent event) {
-		proxy.init();
+		
+		proxy.preInit();
 	}
 
 	public static class CommonProxy {
 
-		public void init() {
+		public void preInit() {
 
 		}
 	}
@@ -60,7 +60,7 @@ public class ExtendedMetadataTest {
 	public static class ClientProxy extends CommonProxy {
 
 		@Override
-		public void init() {
+		public void preInit() {
 			EMModelLoader.registerBlock(block);
 		}
 	}
@@ -69,11 +69,12 @@ public class ExtendedMetadataTest {
 
 		public static final String NAME = "extended_metadata";
 		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 300);
-
+		public static final PropertyBool HALF = PropertyBool.create("half");
+		
 		public BlockExtendedMetadata() {
 			super(Material.cloth, 301);
 			setUnlocalizedName(MOD_ID.toLowerCase() + ":" + NAME);
-			setDefaultState(blockState.getBaseState().withProperty(VALUE, 0));
+			setDefaultState(blockState.getBaseState().withProperty(VALUE, 0).withProperty(HALF, false));
 			setHardness(0.8F);
 			setStepSound(Block.soundTypeCloth);
 			setCreativeTab(CreativeTabs.tabBlock);
@@ -81,10 +82,11 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
-			if(world.isRemote) {
-				return true;
+			if(!world.isRemote) {
+				player.addChatMessage(new ChatComponentText("Metadata: " + state.getValue(VALUE)));
+			
+				world.setBlockState(pos, state.withProperty(HALF, !Boolean.valueOf((Boolean) state.getValue(HALF))));
 			}
-			player.addChatMessage(new ChatComponentText("Metadata: " + state.getValue(VALUE)));
 			return true;
 		}
 
@@ -98,6 +100,26 @@ public class ExtendedMetadataTest {
 		}
 
 		@Override
+		public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity) {
+			setBlockBoundsBasedOnState(world, pos);
+			super.addCollisionBoxesToList(world, pos, state, mask, list, collidingEntity);
+		}
+		
+		@Override
+		public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
+			if(((Boolean) world.getBlockState(pos).getValue(HALF)).booleanValue()) {
+				setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
+			} else {
+				setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+			}
+		}
+		
+		@Override
+		public boolean isOpaqueCube() {
+			return false;
+		}
+		
+		@Override
 		public String getUnlocalizedName(int meta) {
 			return "extended_" + Integer.toString(meta);
 		}
@@ -109,17 +131,17 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public IBlockState getStateFromMeta(int meta) {
-			return getDefaultState().withProperty(VALUE, meta);
+			return getDefaultState().withProperty(VALUE, Integer.valueOf(meta >> 1)).withProperty(HALF, Boolean.valueOf((meta & 1) == 1));
 		}
 
 		@Override
 		public int getMetaFromState(IBlockState state) {
-			return ((Integer) state.getValue(VALUE)).intValue();
+			return (((Integer) state.getValue(VALUE)).intValue() << 1) | (((Boolean) state.getValue(HALF)).booleanValue() ? 1 : 0);
 		}
 
 		@Override
 		protected BlockState createBlockState() {
-			return new BlockState(this, VALUE);
+			return new BlockState(this, VALUE, HALF);
 		}
 
 		@SuppressWarnings({"rawtypes", "unchecked"})

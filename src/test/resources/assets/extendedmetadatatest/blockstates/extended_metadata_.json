@@ -1,9 +1,0 @@
-{
-	"variants": {
-		"value={0},type={1}": {
-			"textures": {
-				"all": "extendedmetadata:blocks/em_{0}_{1}"
-			}
-		}
-	}
-}
