@@ -32,6 +32,7 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.registry.GameData;
 
 import org.agecraft.extendedmetadata.EMUtil;
+import org.agecraft.extendedmetadata.ExtendedMetadata;
 import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Charsets;
@@ -52,7 +53,7 @@ public class EMModelLoader {
 	protected static Method sync;
 
 	private static HashMap<Block, ResourceLocation> blocks = Maps.newHashMap();
-	
+
 	public static void registerBlock(Block block) {
 		ResourceLocation tmp = (ResourceLocation) GameData.getBlockRegistry().getNameForObject(block);
 		registerBlock(block, new ResourceLocation(tmp.getResourceDomain(), "blockstates/" + tmp.getResourcePath() + ".json"));
@@ -72,13 +73,14 @@ public class EMModelLoader {
 	}
 
 	public static void load(ModelLoader loader) {
-		System.out.println("LOAD MODELS");
 		try {
+			ExtendedMetadata.log.info("Loading models");
+			
 			createBlockState = EMUtil.getMethod(Block.class, "createBlockState", "func_180661_e", "e");
 			getSubmodelPermutations = EMUtil.getMethod(ForgeBlockStateV1.Deserializer.class, "getSubmodelPermutations", "getSubmodelPermutations", "getSubmodelPermutations", ForgeBlockStateV1.Variant.class, Map.class);
 			constructor = EMUtil.getConstructor(ForgeBlockStateV1.Variant.class, ForgeBlockStateV1.Variant.class);
 			sync = EMUtil.getMethod(ForgeBlockStateV1.Variant.class, "sync", "sync", "sync", ForgeBlockStateV1.Variant.class);
-			
+
 			blockDefinitions = EMUtil.getField(ModelBakery.class, "blockDefinitions", "field_177614_t", "t");
 			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) blockDefinitions.get(loader);
 
@@ -107,19 +109,26 @@ public class EMModelLoader {
 			}
 
 			blockDefinitions.set(loader, map);
+			
+			ExtendedMetadata.log.info("Finished loading models");
 		} catch(Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
 	private static ModelBlockDefinition loadModelBlockDefinition(Block block, EMBlockState blockState) throws Exception {
-		ImmutableList<StateImplementation> states = ((BlockState) createBlockState.invoke(block)).getValidStates();
+		BlockState state = ((BlockState) createBlockState.invoke(block));
+		ImmutableList<StateImplementation> states = state.getValidStates();
 
-		blockState.load(block, states);
+		HashMap<String, IProperty> properties = Maps.newHashMap();
+		for(IProperty property : (Collection<IProperty>) state.getProperties()) {
+			properties.put(property.getName(), property);
+		}
+		blockState.load(block, properties, states);
 
 		ArrayList<Variants> list = Lists.newArrayList();
 
-		for(Entry<String, Collection<ForgeBlockStateV1.Variant>> entry : blockState.actualVariants.asMap().entrySet()) {
+		for(Entry<String, Collection<ForgeBlockStateV1.Variant>> entry : blockState.variants.asMap().entrySet()) {
 			ArrayList<Variant> variants = new ArrayList<Variant>();
 
 			for(ForgeBlockStateV1.Variant variant : entry.getValue()) {

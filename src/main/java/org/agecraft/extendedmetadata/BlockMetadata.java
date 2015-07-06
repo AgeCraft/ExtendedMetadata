@@ -9,8 +9,8 @@ import net.minecraft.util.StatCollector;
 
 public class BlockMetadata extends Block {
 
-	private String[] harvestTool;
-	private int[] harvestLevel;
+	protected String[] harvestTool;
+	protected int[] harvestLevel;
 
 	public BlockMetadata(Material material, int maxMetadata) {
 		super(material);
@@ -18,7 +18,7 @@ public class BlockMetadata extends Block {
 		this.harvestLevel = new int[maxMetadata];
 		Arrays.fill(harvestLevel, -1);
 	}
-
+	
 	@Override
 	public int damageDropped(IBlockState state) {
 		return getMetaFromState(state);

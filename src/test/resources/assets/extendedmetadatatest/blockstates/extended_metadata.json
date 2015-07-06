@@ -2,7 +2,7 @@
 	"variants": {
 		"value={0}": {
 			"textures": {
-				"all": "extendedmetadata:blocks/extended_metadata_{0}"
+				"all": "extendedmetadatatest:blocks/extended_metadata_{0}"
 			}
 		},
 		"half": {

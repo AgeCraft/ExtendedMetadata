@@ -3,11 +3,15 @@ package org.agecraft.extendedmetadata;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState.StateImplementation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,6 +28,9 @@ import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 
 public class ExtendedMetadata {
@@ -41,6 +48,11 @@ public class ExtendedMetadata {
 
 	public static Method func_180737_a;
 	public static Method func_179757_a;
+
+	public static Field propertyValueTable;
+	public static Method setPropertyValue;
+
+	public static Logger log = Logger.getLogger("ExtendedMetadata");
 
 	public static void init() {
 		try {
@@ -78,6 +90,35 @@ public class ExtendedMetadata {
 
 	public static IBlockState getStateFromID(int id) {
 		return Block.getBlockById((id >> 16) & 32767).getStateFromMeta(id & 65535);
+	}
+
+	//TODO: replace block states, this is just a vanilla implementation
+	public static void buildPropertyValueTable(StateImplementation state, ImmutableMap<IProperty, Object> properties, Map<Map<IProperty, Comparable>, IBlockState> map) {
+		if(propertyValueTable == null) {
+			try {
+				propertyValueTable = EMUtil.getField(StateImplementation.class, "propertyValueTable", "field_177238_c", "c");
+				setPropertyValue = EMUtil.getMethod(StateImplementation.class, "setPropertyValue", "func_177236_b", "b", IProperty.class, Comparable.class);
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		try {
+			if(propertyValueTable.get(state) != null) {
+				throw new IllegalStateException();
+			} else {
+				HashBasedTable<IProperty, Comparable, IBlockState> table = HashBasedTable.create();
+				for(IProperty property : properties.keySet()) {
+					for(Comparable comparable : (Collection<Comparable>) property.getAllowedValues()) {
+						if(comparable != properties.get(property)) {
+							table.put(property, comparable, map.get(setPropertyValue.invoke(state, property, comparable)));
+						}
+					}
+				}
+				propertyValueTable.set(state, ImmutableTable.copyOf(table));
+			}
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static Chunk readChunkFromNBT(World world, NBTTagCompound nbt) {

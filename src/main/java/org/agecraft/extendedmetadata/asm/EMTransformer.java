@@ -17,6 +17,7 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import codechicken.lib.asm.ASMBlock;
 import codechicken.lib.asm.ASMReader;
@@ -293,6 +294,27 @@ public class EMTransformer implements IClassTransformer {
 
 		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "func_149671_p", "()V"), asmblocks.get("old_registerBlocks"), asmblocks.get("registerBlocks")));
 
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/block/properties/PropertyInteger", "<init>", "(Ljava/lang/String;II)V")) {
+
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.INVOKESTATIC) {
+						MethodInsnNode methodInsn = (MethodInsnNode) insn;
+						if(methodInsn.name.equals("newHashSet") && methodInsn.desc.equals("()Ljava/util/HashSet;")) {
+							methodInsn.name = "newHashSetWithExpectedSize";
+							methodInsn.desc = "(I)Ljava/util/HashSet;";
+							methodNode.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ILOAD, 3));
+						}
+					}
+				}
+			}
+		});
+		
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177235_a", "(Ljava/util/Map;)V"), asmblocks.get("buildPropertyValueTable")));
+		
 		if(FMLLaunchHandler.side().isClient()) {
 			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/Chunk", "func_177439_a", "([BIZ)V"), asmblocks.get("readChunkFromPacket")));
 

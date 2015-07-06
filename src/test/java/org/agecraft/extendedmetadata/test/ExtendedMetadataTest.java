@@ -26,7 +26,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-import org.agecraft.extendedmetadata.BlockMetadata;
+import org.agecraft.extendedmetadata.BlockBasicMetadata;
 import org.agecraft.extendedmetadata.ItemBlockMetadata;
 import org.agecraft.extendedmetadata.client.EMModelLoader;
 
@@ -65,14 +65,14 @@ public class ExtendedMetadataTest {
 		}
 	}
 
-	public static class BlockExtendedMetadata extends BlockMetadata {
+	public static class BlockExtendedMetadata extends BlockBasicMetadata {
 
 		public static final String NAME = "extended_metadata";
-		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 300);
+		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 10000);
 		public static final PropertyBool HALF = PropertyBool.create("half");
 		
 		public BlockExtendedMetadata() {
-			super(Material.cloth, 301);
+			super(Material.cloth);
 			setUnlocalizedName(MOD_ID.toLowerCase() + ":" + NAME);
 			setDefaultState(blockState.getBaseState().withProperty(VALUE, 0).withProperty(HALF, false));
 			setHardness(0.8F);
@@ -92,7 +92,7 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-			IBlockState state = getDefaultState().withProperty(VALUE, meta);
+			IBlockState state = getDefaultState().withProperty(VALUE, meta & 32767);
 			if(!world.isRemote) {
 				placer.addChatMessage(new ChatComponentText("Placing metadata: " + state.getValue(VALUE)));
 			}
@@ -156,6 +156,8 @@ public class ExtendedMetadataTest {
 			list.add(new ItemStack(item, 1, 255));
 			list.add(new ItemStack(item, 1, 256));
 			list.add(new ItemStack(item, 1, 300));
+			list.add(new ItemStack(item, 1, 1023));
+			list.add(new ItemStack(item, 1, 32767));
 		}
 	}
 }
