@@ -109,3 +109,17 @@ ILOAD 4
 LDC 65535
 IAND
 INVOKEVIRTUAL net/minecraft/block/Block.func_176203_a (I)Lnet/minecraft/block/state/IBlockState;
+
+# net.minecraftforge.client.model.ModelLoader
+list setupModelRegistry
+ALOAD 0
+INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.load (Lnet/minecraftforge/client/model/ModelLoader;)V;
+
+# net.minecraft.block.state.BlockState
+list buildPropertyValueTable
+ALOAD 0
+ALOAD 0
+GETFIELD net/minecraft/block/state/BlockState$StateImplementation.field_177237_b : Lcom/google/common/collect/ImmutableMap;
+ALOAD 1
+INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.buildPropertyValueTable (Lnet/minecraft/block/state/BlockState$StateImplementation;Lcom/google/common/collect/ImmutableMap;Ljava/util/Map;)V
+RETURN

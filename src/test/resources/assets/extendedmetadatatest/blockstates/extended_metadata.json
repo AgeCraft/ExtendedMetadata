@@ -1,0 +1,22 @@
+{
+	"variants": {
+		"value={0}": {
+			"textures": {
+				"all": "extendedmetadatatest:blocks/extended_metadata_{0}"
+			}
+		},
+		"half": {
+			"false": {
+				"model": "minecraft:cube_all"
+			},
+			"true": {
+				"model": "minecraft:half_slab",
+				"textures": {
+					"side": "#all",
+					"top": "#all",
+					"bottom": "#all"
+				}
+			}
+		}
+	}
+}

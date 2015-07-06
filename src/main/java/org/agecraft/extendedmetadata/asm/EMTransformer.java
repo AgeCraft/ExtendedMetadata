@@ -17,6 +17,7 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import codechicken.lib.asm.ASMBlock;
 import codechicken.lib.asm.ASMReader;
@@ -29,10 +30,10 @@ import codechicken.lib.asm.ModularASMTransformer.MethodWriter;
 import codechicken.lib.asm.ObfMapping;
 
 public class EMTransformer implements IClassTransformer {
-	
+
 	private ModularASMTransformer transformer = new ModularASMTransformer();
 	private Map<String, ASMBlock> asmblocks = ASMReader.loadResource("/assets/extendedmetadata/asm/blocks.asm");
-	
+
 	public EMTransformer() {
 		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "field_177488_d", "[C"), "[I"));
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "<init>", "(IZ)V")) {
@@ -124,11 +125,11 @@ public class EMTransformer implements IClassTransformer {
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
 						}
-					} 
+					}
 				}
 			}
 		});
-		
+
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/stats/StatList", "<clinit>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -142,11 +143,11 @@ public class EMTransformer implements IClassTransformer {
 						} else if(intInsn.operand == 32000) {
 							methodNode.instructions.set(insn, new LdcInsnNode(new Integer(65536)));
 						}
-					} 
+					}
 				}
 			}
 		});
-		
+
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/util/ObjectIntIdentityMap", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -169,7 +170,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		
+
 		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "field_177860_a", "[S"), "[I"));
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
 			@Override
@@ -227,7 +228,7 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		
+
 		transformer.add(new ClassNodeTransformer() {
 			@Override
 			public String className() {
@@ -249,8 +250,8 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		final ASMBlock needle = asmblocks.get("old_registerBlock");
-		final ASMBlock replacement = asmblocks.get("registerBlock");
+		final ASMBlock needle1 = asmblocks.get("old_registerBlock");
+		final ASMBlock replacement1 = asmblocks.get("registerBlock");
 		transformer.add(new ClassNodeTransformer() {
 			@Override
 			public String className() {
@@ -261,10 +262,10 @@ public class EMTransformer implements IClassTransformer {
 			public void transform(ClassNode node) {
 				for(MethodNode methodNode : node.methods) {
 					if(methodNode.name.equals("registerBlock") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Ljava/lang/String;I)I")) {
-						for(InsnListSection key : InsnComparator.findN(methodNode.instructions, needle.list)) {
-			                ASMBlock replaceBlock = replacement.copy().pullLabels(needle.applyLabels(key));
-			                key.insert(replaceBlock.list.list);
-			            }
+						for(InsnListSection key : InsnComparator.findN(methodNode.instructions, needle1.list)) {
+							ASMBlock replaceBlock = replacement1.copy().pullLabels(needle1.applyLabels(key));
+							key.insert(replaceBlock.list.list);
+						}
 					}
 				}
 			}
@@ -272,7 +273,7 @@ public class EMTransformer implements IClassTransformer {
 
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "func_176210_f", "(Lnet/minecraft/block/state/IBlockState;)I"), asmblocks.get("getStateId")));
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/block/Block", "func_176220_d", "(I)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("getStateById")));
-		
+
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
@@ -287,17 +288,55 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_179756_a", "(Lnet/minecraft/world/chunk/Chunk;ZZI)Lnet/minecraft/network/play/server/S21PacketChunkData$Extracted;"), asmblocks.get("writeChunkToPacket")));
-		
+
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "func_75823_a", "(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;"), asmblocks.get("readChunkFromNBT")));
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/storage/AnvilChunkLoader", "func_75820_a", "(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)V"), asmblocks.get("writeChunkToNBT")));
 
 		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "func_149671_p", "()V"), asmblocks.get("old_registerBlocks"), asmblocks.get("registerBlocks")));
+
+		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/block/properties/PropertyInteger", "<init>", "(Ljava/lang/String;II)V")) {
+
+			@Override
+			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+				while(iterator.hasNext()) {
+					AbstractInsnNode insn = iterator.next();
+					if(insn.getOpcode() == Opcodes.INVOKESTATIC) {
+						MethodInsnNode methodInsn = (MethodInsnNode) insn;
+						if(methodInsn.name.equals("newHashSet") && methodInsn.desc.equals("()Ljava/util/HashSet;")) {
+							methodInsn.name = "newHashSetWithExpectedSize";
+							methodInsn.desc = "(I)Ljava/util/HashSet;";
+							methodNode.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ILOAD, 3));
+						}
+					}
+				}
+			}
+		});
+		
+		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177235_a", "(Ljava/util/Map;)V"), asmblocks.get("buildPropertyValueTable")));
 		
 		if(FMLLaunchHandler.side().isClient()) {
 			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/Chunk", "func_177439_a", "([BIZ)V"), asmblocks.get("readChunkFromPacket")));
-			
+
 			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_1"), asmblocks.get("playAusSFX_1")));
 			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_2"), asmblocks.get("playAusSFX_2")));
+
+			final ASMBlock injection = asmblocks.get("setupModelRegistry");
+			transformer.add(new ClassNodeTransformer() {
+				@Override
+				public String className() {
+					return "net.minecraftforge.client.model.ModelLoader";
+				}
+
+				@Override
+				public void transform(ClassNode node) {
+					for(MethodNode methodNode : node.methods) {
+						if(methodNode.name.equals("setupModelRegistry") && methodNode.desc.equals("()Lnet/minecraft/util/IRegistry;")) {
+							methodNode.instructions.insert(injection.rawListCopy());
+						}
+					}
+				}
+			});
 		}
 	}
 

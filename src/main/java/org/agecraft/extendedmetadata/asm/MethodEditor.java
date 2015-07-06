@@ -28,6 +28,6 @@ public abstract class MethodEditor extends ClassNodeTransformer {
 		}
 		transformMethod(node, methodNode);
 	}
-	
-	public abstract void transformMethod(ClassNode node, MethodNode method);
+
+	public abstract void transformMethod(ClassNode node, MethodNode methodNode);
 }

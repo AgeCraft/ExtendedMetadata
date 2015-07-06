@@ -3,11 +3,15 @@ package org.agecraft.extendedmetadata;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState.StateImplementation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,13 +28,16 @@ import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 
 public class ExtendedMetadata {
 
 	public static Method getData;
 	public static Method setData;
-	
+
 	public static Field chunkWorldObj;
 	public static Field chunkStorageArrays;
 	public static Field chunkTileEntityMap;
@@ -42,70 +49,37 @@ public class ExtendedMetadata {
 	public static Method func_180737_a;
 	public static Method func_179757_a;
 
+	public static Field propertyValueTable;
+	public static Method setPropertyValue;
+
+	public static Logger log = Logger.getLogger("ExtendedMetadata");
+
 	public static void init() {
 		try {
-			getData = getMethod(ExtendedBlockStorage.class, "getData", "func_177487_g", "g");
-			setData = getMethod(ExtendedBlockStorage.class, "setData", "func_177486_a", "a", int[].class);
+			getData = EMUtil.getMethod(ExtendedBlockStorage.class, "getData", "func_177487_g", "g");
+			setData = EMUtil.getMethod(ExtendedBlockStorage.class, "setData", "func_177486_a", "a", int[].class);
 
-			chunkWorldObj = getField(Chunk.class, "worldObj", "field_76637_e", "i");
-			chunkStorageArrays = getField(Chunk.class, "storageArrays", "field_76652_q", "d");
-			chunkTileEntityMap = getField(Chunk.class, "chunkTileEntityMap", "field_150816_i", "l");
-			chunkBlockBiomeArray = getField(Chunk.class, "blockBiomeArray", "field_76651_r", "e");
-			chunkIsLightPopulated = getField(Chunk.class, "isLightPopulated", "field_150814_l", "o");
-			chunkIsTerrainPopulated = getField(Chunk.class, "isTerrainPopulated", "field_76646_k", "n");
+			chunkWorldObj = EMUtil.getField(Chunk.class, "worldObj", "field_76637_e", "i");
+			chunkStorageArrays = EMUtil.getField(Chunk.class, "storageArrays", "field_76652_q", "d");
+			chunkTileEntityMap = EMUtil.getField(Chunk.class, "chunkTileEntityMap", "field_150816_i", "l");
+			chunkBlockBiomeArray = EMUtil.getField(Chunk.class, "blockBiomeArray", "field_76651_r", "e");
+			chunkIsLightPopulated = EMUtil.getField(Chunk.class, "isLightPopulated", "field_150814_l", "o");
+			chunkIsTerrainPopulated = EMUtil.getField(Chunk.class, "isTerrainPopulated", "field_76646_k", "n");
 			if(FMLLaunchHandler.side().isClient()) {
-				chunkGenerateHeightMap = getMethod(Chunk.class, "generateHeightMap", "func_76590_a", "a");
+				chunkGenerateHeightMap = EMUtil.getMethod(Chunk.class, "generateHeightMap", "func_76590_a", "a");
 			}
-			
-			func_180737_a = getMethod(S21PacketChunkData.class, "func_180737_a", "func_180737_a", "a", int.class, boolean.class, boolean.class);
-			func_179757_a = getMethod(S21PacketChunkData.class, "func_179757_a", "func_179757_a", "a", byte[].class, byte[].class, int.class);
+
+			func_180737_a = EMUtil.getMethod(S21PacketChunkData.class, "func_180737_a", "func_180737_a", "a", int.class, boolean.class, boolean.class);
+			func_179757_a = EMUtil.getMethod(S21PacketChunkData.class, "func_179757_a", "func_179757_a", "a", byte[].class, byte[].class, int.class);
 		} catch(Exception e) {
 			throw new RuntimeException("Error while initializing ExtendedMetadata: ", e);
 		}
-	}
-	
-	public static Method getMethod(Class<?> clazz, String name, String srgName, String obfName, Class<?>... params) throws Exception {
-		Method method = null;
-		try {
-			method = clazz.getDeclaredMethod(obfName, params);
-		} catch(Exception e1) {
-			try {
-				method = clazz.getDeclaredMethod(srgName, params);
-			} catch(Exception e2) {
-				try {
-					method = clazz.getDeclaredMethod(name, params);
-				} catch(Exception e3) {
-					throw e3;
-				}
-			}
-		}
-		method.setAccessible(true);
-		return method;
-	}
-	
-	public static Field getField(Class<?> clazz, String name, String srgName, String obfName) throws Exception {
-		Field field = null;
-		try {
-			field = clazz.getDeclaredField(obfName);
-		} catch(Exception e1) {
-			try {
-				field = clazz.getDeclaredField(srgName);
-			} catch(Exception e2) {
-				try {
-					field = clazz.getDeclaredField(name);
-				} catch(Exception e3) {
-					throw e3;
-				}
-			}
-		}
-		field.setAccessible(true);
-		return field;
 	}
 
 	public static int getIDFromState(IBlockState state) {
 		return getIDFromState(Block.getIdFromBlock(state.getBlock()), state);
 	}
-	
+
 	public static int getIDFromState(Block block, IBlockState state) {
 		return getIDFromState(Block.getIdFromBlock(block), state);
 	}
@@ -116,6 +90,35 @@ public class ExtendedMetadata {
 
 	public static IBlockState getStateFromID(int id) {
 		return Block.getBlockById((id >> 16) & 32767).getStateFromMeta(id & 65535);
+	}
+
+	//TODO: replace block states, this is just a vanilla implementation
+	public static void buildPropertyValueTable(StateImplementation state, ImmutableMap<IProperty, Object> properties, Map<Map<IProperty, Comparable>, IBlockState> map) {
+		if(propertyValueTable == null) {
+			try {
+				propertyValueTable = EMUtil.getField(StateImplementation.class, "propertyValueTable", "field_177238_c", "c");
+				setPropertyValue = EMUtil.getMethod(StateImplementation.class, "setPropertyValue", "func_177236_b", "b", IProperty.class, Comparable.class);
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		try {
+			if(propertyValueTable.get(state) != null) {
+				throw new IllegalStateException();
+			} else {
+				HashBasedTable<IProperty, Comparable, IBlockState> table = HashBasedTable.create();
+				for(IProperty property : properties.keySet()) {
+					for(Comparable comparable : (Collection<Comparable>) property.getAllowedValues()) {
+						if(comparable != properties.get(property)) {
+							table.put(property, comparable, map.get(setPropertyValue.invoke(state, property, comparable)));
+						}
+					}
+				}
+				propertyValueTable.set(state, ImmutableTable.copyOf(table));
+			}
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static Chunk readChunkFromNBT(World world, NBTTagCompound nbt) {
