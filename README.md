@@ -15,6 +15,11 @@ For those that are curious how this mod was made: I forked Minecraft Forge and s
 This increases the amount of disk storage and network bandwidth being used. This in can cause lag, you have been warned.
 Also be careful with the 1.8 model / texture loader, using too much metadata can cause out of memory errors. The solution for this is a custom model or texture loader, we are working on implementing something like that, but it might take some time to perfect.
 
+## Blockstate / Model Loader
+ExtendedMetadata also adds an improved blockstate / model loader, example: https://github.com/AgeCraft/ExtendedMetadata/blob/master/src/test/resources/assets/extendedmetadatatest/blockstates/extended_metadata.json
+
+Note that a variable (a number between `{}`) is bound to a property, it can be used in multiple places as long as the property name stays the same. 
+
 ## Dependencies
 * [Minecraft Forge](http://minecraftforge.net) 11.14.1.1419 or higher
 * [CodeChickenCore](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.0.5.34 or higher
