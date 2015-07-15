@@ -11,7 +11,7 @@ public class EMUtil {
 		constructor.setAccessible(true);
 		return constructor;
 	}
-	
+
 	public static Field getField(Class<?> clazz, String name, String srgName, String obfName) throws Exception {
 		Field field = null;
 		try {
@@ -30,7 +30,7 @@ public class EMUtil {
 		field.setAccessible(true);
 		return field;
 	}
-	
+
 	public static Method getMethod(Class<?> clazz, String name, String srgName, String obfName, Class<?>... params) throws Exception {
 		Method method = null;
 		try {

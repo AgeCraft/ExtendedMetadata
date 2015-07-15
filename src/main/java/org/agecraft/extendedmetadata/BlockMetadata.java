@@ -18,7 +18,7 @@ public class BlockMetadata extends Block {
 		this.harvestLevel = new int[maxMetadata];
 		Arrays.fill(harvestLevel, -1);
 	}
-	
+
 	@Override
 	public int damageDropped(IBlockState state) {
 		return getMetaFromState(state);

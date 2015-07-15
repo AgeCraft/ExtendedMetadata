@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
@@ -52,7 +54,7 @@ public class ExtendedMetadata {
 	public static Field propertyValueTable;
 	public static Method setPropertyValue;
 
-	public static Logger log = Logger.getLogger("ExtendedMetadata");
+	public static Logger log = LogManager.getLogger("ExtendedMetadata");
 
 	public static void init() {
 		try {
@@ -92,7 +94,6 @@ public class ExtendedMetadata {
 		return Block.getBlockById((id >> 16) & 32767).getStateFromMeta(id & 65535);
 	}
 
-	//TODO: replace block states, this is just a vanilla implementation
 	public static void buildPropertyValueTable(StateImplementation state, ImmutableMap<IProperty, Object> properties, Map<Map<IProperty, Comparable>, IBlockState> map) {
 		if(propertyValueTable == null) {
 			try {

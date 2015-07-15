@@ -312,9 +312,9 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		
+
 		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177235_a", "(Ljava/util/Map;)V"), asmblocks.get("buildPropertyValueTable")));
-		
+
 		if(FMLLaunchHandler.side().isClient()) {
 			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/Chunk", "func_177439_a", "([BIZ)V"), asmblocks.get("readChunkFromPacket")));
 

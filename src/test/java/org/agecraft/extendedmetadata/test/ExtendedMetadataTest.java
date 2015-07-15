@@ -46,7 +46,7 @@ public class ExtendedMetadataTest {
 		block = new BlockExtendedMetadata();
 
 		GameRegistry.registerBlock(block, ItemBlockMetadata.class, BlockExtendedMetadata.NAME);
-		
+
 		proxy.preInit();
 	}
 
@@ -68,9 +68,9 @@ public class ExtendedMetadataTest {
 	public static class BlockExtendedMetadata extends BlockBasicMetadata {
 
 		public static final String NAME = "extended_metadata";
-		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 10000);
+		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 4095);
 		public static final PropertyBool HALF = PropertyBool.create("half");
-		
+
 		public BlockExtendedMetadata() {
 			super(Material.cloth);
 			setUnlocalizedName(MOD_ID.toLowerCase() + ":" + NAME);
@@ -84,7 +84,7 @@ public class ExtendedMetadataTest {
 		public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
 			if(!world.isRemote) {
 				player.addChatMessage(new ChatComponentText("Metadata: " + state.getValue(VALUE)));
-			
+
 				world.setBlockState(pos, state.withProperty(HALF, !Boolean.valueOf((Boolean) state.getValue(HALF))));
 			}
 			return true;
@@ -104,7 +104,7 @@ public class ExtendedMetadataTest {
 			setBlockBoundsBasedOnState(world, pos);
 			super.addCollisionBoxesToList(world, pos, state, mask, list, collidingEntity);
 		}
-		
+
 		@Override
 		public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
 			if(((Boolean) world.getBlockState(pos).getValue(HALF)).booleanValue()) {
@@ -113,12 +113,12 @@ public class ExtendedMetadataTest {
 				setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
 			}
 		}
-		
+
 		@Override
 		public boolean isOpaqueCube() {
 			return false;
 		}
-		
+
 		@Override
 		public String getUnlocalizedName(int meta) {
 			return "extended_" + Integer.toString(meta);
@@ -157,7 +157,7 @@ public class ExtendedMetadataTest {
 			list.add(new ItemStack(item, 1, 256));
 			list.add(new ItemStack(item, 1, 300));
 			list.add(new ItemStack(item, 1, 1023));
-			list.add(new ItemStack(item, 1, 32767));
+			list.add(new ItemStack(item, 1, 4095));
 		}
 	}
 }

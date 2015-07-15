@@ -75,7 +75,7 @@ public class EMModelLoader {
 	public static void load(ModelLoader loader) {
 		try {
 			ExtendedMetadata.log.info("Loading models");
-			
+
 			createBlockState = EMUtil.getMethod(Block.class, "createBlockState", "func_180661_e", "e");
 			getSubmodelPermutations = EMUtil.getMethod(ForgeBlockStateV1.Deserializer.class, "getSubmodelPermutations", "getSubmodelPermutations", "getSubmodelPermutations", ForgeBlockStateV1.Variant.class, Map.class);
 			constructor = EMUtil.getConstructor(ForgeBlockStateV1.Variant.class, ForgeBlockStateV1.Variant.class);
@@ -109,7 +109,7 @@ public class EMModelLoader {
 			}
 
 			blockDefinitions.set(loader, map);
-			
+
 			ExtendedMetadata.log.info("Finished loading models");
 		} catch(Exception e) {
 			throw new RuntimeException(e);

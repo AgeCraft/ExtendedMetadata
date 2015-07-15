@@ -37,7 +37,7 @@ public class EMBlockState {
 	public Multimap<Collection<String>, JsonObject> variantsJson = HashMultimap.create();
 	public Multimap<String, Variant> variants = HashMultimap.create();
 	public int maxVariable = 0;
-	
+
 	public static class Deserializer implements JsonDeserializer<EMBlockState> {
 
 		public static final Deserializer INSTANCE = new Deserializer();
@@ -83,7 +83,7 @@ public class EMBlockState {
 
 			for(Entry<Collection<String>, Collection<JsonObject>> entry : variantsJson.asMap().entrySet()) {
 				Object[] variables = new Object[maxVariable + 1];
-				
+
 				boolean matches = true;
 				for(String key : entry.getKey()) {
 					String[] split = key.split("=");
@@ -126,7 +126,7 @@ public class EMBlockState {
 			}
 		}
 	}
-	
+
 	private static JsonObject replaceObjectVariables(Object[] variables, JsonObject json) {
 		JsonObject copy = new JsonObject();
 		for(Entry<String, JsonElement> entry : json.entrySet()) {
@@ -142,7 +142,7 @@ public class EMBlockState {
 		}
 		return copy;
 	}
-	
+
 	private static JsonElement replacePrimitiveVariables(Object[] variables, JsonPrimitive primitive) {
 		if(primitive.isString()) {
 			return new JsonPrimitive(MessageFormat.format(primitive.getAsString(), variables));
@@ -153,7 +153,7 @@ public class EMBlockState {
 		}
 		return JsonNull.INSTANCE;
 	}
-	
+
 	private static JsonArray replaceArrayVariables(Object[] variables, JsonArray array) {
 		JsonArray arrayCopy = new JsonArray();
 		for(JsonElement element : array) {
