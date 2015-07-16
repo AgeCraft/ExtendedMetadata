@@ -95,7 +95,7 @@ public class EMBlockState {
 					}
 
 					if(split[1].charAt(0) == '{') {
-						variables[Integer.parseInt(split[1].substring(1, split[1].length() - 1))] = state.getValue(property);
+						variables[Integer.parseInt(split[1].substring(1, split[1].length() - 1))] = property.getName(state.getValue(property));
 					}
 				}
 				if(matches) {
