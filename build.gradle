@@ -47,13 +47,13 @@ minecraft {
     version = config.minecraft_version + "-" + config.forge_version
     runDir = "run"
 
-    replace "@VERSION@", "${config.mod_version}.${System.getenv("CIRCLE_BUILD_NUM") ?: 0}"
+    replace "@VERSION@", "${config.mod_version}.${System.getenv("CIRCLE_BUILD_NUM") ?: (System.getenv("BUILD_NUMBER") ?: 0)}"
     replace "@MC_VERSION@", config.minecraft_version
 
     mappings = config.minecraft_mappings
 }
 
-version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("CIRCLE_BUILD_NUM") ?: 0}"
+version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("CIRCLE_BUILD_NUM") ?: (System.getenv("BUILD_NUMBER") ?: 0)}"
 
 processResources {
     inputs.property "version", project.version
