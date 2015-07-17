@@ -21,7 +21,7 @@ ExtendedMetadata also adds an improved blockstate / model loader, example: https
 Note that a variable (a number between `{}`) is bound to a property, it can be used in multiple places as long as the property name stays the same. 
 
 ## Dependencies
-* [Minecraft Forge](http://minecraftforge.net) 11.14.1.1419 or higher
+* [Minecraft Forge](http://minecraftforge.net) 11.14.3.1487 or higher
 * [CodeChickenCore](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.0.5.34 or higher
 * [CodeChickenLib](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.1.2.133 or higher
 
