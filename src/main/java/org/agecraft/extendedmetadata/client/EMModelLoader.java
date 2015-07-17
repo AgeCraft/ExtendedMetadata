@@ -28,6 +28,7 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ForgeBlockStateV1;
+import net.minecraftforge.client.model.ForgeBlockStateV1.TRSRDeserializer;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.fml.common.registry.GameData;
@@ -45,7 +46,7 @@ import com.google.gson.GsonBuilder;
 
 public class EMModelLoader {
 
-	public static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(EMBlockState.class, EMBlockState.Deserializer.INSTANCE).registerTypeAdapter(ForgeBlockStateV1.Variant.class, EMBlockState.Deserializer.FORGE_INSTANCE).create();
+	public static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(EMBlockState.class, EMBlockState.Deserializer.INSTANCE).registerTypeAdapter(ForgeBlockStateV1.Variant.class, EMBlockState.Deserializer.FORGE_INSTANCE).registerTypeAdapter(TRSRTransformation.class, TRSRDeserializer.INSTANCE).create();
 
 	private static Field blockDefinitions;
 	private static Method createBlockState;
@@ -136,7 +137,7 @@ public class EMModelLoader {
 				boolean uvLock = variant.getUvLock().or(false);
 				int weight = variant.getWeight().or(1);
 
-				if(variant.getModel() != null && variant.getSubmodels().size() == 0 && variant.getTextures().size() == 0) {
+				if(variant.getModel() != null && variant.getSubmodels().size() == 0 && variant.getTextures().size() == 0 && variant.getCustomData().size() == 0 && variant.getState().orNull() instanceof ModelRotation) {
 					variants.add(new Variant(variant.getModel(), (ModelRotation) variant.getState().get(), uvLock, weight));
 				} else {
 					variants.add(new SmartVariant(variant.getModel(), variant.getState().or(TRSRTransformation.identity()), uvLock, weight, variant.getTextures(), variant.getOnlyPartsVariant(), variant.getCustomData()));
