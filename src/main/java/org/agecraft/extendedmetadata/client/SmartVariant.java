@@ -1,21 +1,21 @@
 package org.agecraft.extendedmetadata.client;
 
+import java.io.IOException;
 import java.util.Map.Entry;
-
-import javax.vecmath.Matrix4f;
 
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.BlockStateLoader.SubModel;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.IModelCustomData;
 import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.IRetexturableModel;
 import net.minecraftforge.client.model.ISmartVariant;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ModelStateComposition;
 import net.minecraftforge.client.model.MultiModel;
-import net.minecraftforge.client.model.TRSRTransformation;
-import net.minecraftforge.client.model.BlockStateLoader.SubModel;
+import net.minecraftforge.fml.common.FMLLog;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -26,12 +26,14 @@ public class SmartVariant extends ModelBlockDefinition.Variant implements ISmart
 	private final ImmutableMap<String, String> textures;
 	private final ImmutableMap<String, SubModel> parts;
 	private final ImmutableMap<String, String> customData;
+	private final IModelState state;
 
-	public SmartVariant(ResourceLocation model, ModelRotation rotation, boolean uvLock, int weight, ImmutableMap<String, String> textures, ImmutableMap<String, SubModel> parts, ImmutableMap<String, String> customData) {
-		super(model == null ? new ResourceLocation("builtin/missing") : model, rotation, uvLock, weight);
+	public SmartVariant(ResourceLocation model, IModelState state, boolean uvLock, int weight, ImmutableMap<String, String> textures, ImmutableMap<String, SubModel> parts, ImmutableMap<String, String> customData) {
+		super(model == null ? new ResourceLocation("builtin/missing") : model, state instanceof ModelRotation ? (ModelRotation) state : ModelRotation.X0_Y0, uvLock, weight);
 		this.textures = textures;
 		this.parts = parts;
 		this.customData = customData;
+		this.state = state;
 	}
 
 	public IModel runModelHooks(IModel base, ImmutableMap<String, String> textureMap, ImmutableMap<String, String> customData) {
@@ -63,20 +65,30 @@ public class SmartVariant extends ModelBlockDefinition.Variant implements ISmart
 				return base;
 			}
 		}
-		ModelRotation baseRot = getRotation();
+		IModelState baseTr = getState();
 		ImmutableMap.Builder<String, Pair<IModel, IModelState>> models = ImmutableMap.builder();
 		for(Entry<String, SubModel> entry : parts.entrySet()) {
 			SubModel part = entry.getValue();
-
-			Matrix4f matrix = new Matrix4f(baseRot.getMatrix());
-			matrix.mul(part.getRotation().getMatrix());
-			IModelState partState = new TRSRTransformation(matrix);
-			if(part.isUVLock()) {
-				partState = new ModelLoader.UVLock(partState);
+			IModel model = null;
+			try {
+				model = loader.getModel(part.getModelLocation());
+			} catch(IOException e) {
+				FMLLog.warning("Unable to load block sub-model: \'" + part.getModelLocation() /* + "\' for variant: \'" + parent */+ "\': " + e.toString());
+				model = loader.getMissingModel();
 			}
-			models.put(entry.getKey(), Pair.of(runModelHooks(loader.getModel(part.getModelLocation()), part.getTextures(), part.getCustomData()), partState));
+
+			IModelState partState = new ModelStateComposition(baseTr, part.getState());
+			if(part.isUVLock())
+				partState = new ModelLoader.UVLock(partState);
+
+			models.put(entry.getKey(), Pair.of(runModelHooks(model, part.getTextures(), part.getCustomData()), partState));
 		}
-		return new MultiModel(hasBase ? base : null, baseRot, models.build());
+		return new MultiModel(hasBase ? base : null, baseTr, models.build());
+	}
+
+	@Override
+	public IModelState getState() {
+		return state;
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ForgeBlockStateV1;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.fml.common.registry.GameData;
 
 import org.agecraft.extendedmetadata.EMUtil;
@@ -132,14 +133,13 @@ public class EMModelLoader {
 			ArrayList<Variant> variants = new ArrayList<Variant>();
 
 			for(ForgeBlockStateV1.Variant variant : entry.getValue()) {
-				ModelRotation rotation = variant.getRotation().or(ModelRotation.X0_Y0);
 				boolean uvLock = variant.getUvLock().or(false);
 				int weight = variant.getWeight().or(1);
 
 				if(variant.getModel() != null && variant.getSubmodels().size() == 0 && variant.getTextures().size() == 0) {
-					variants.add(new Variant(variant.getModel(), rotation, uvLock, weight));
+					variants.add(new Variant(variant.getModel(), (ModelRotation) variant.getState().get(), uvLock, weight));
 				} else {
-					variants.add(new SmartVariant(variant.getModel(), rotation, uvLock, weight, variant.getTextures(), variant.getOnlyPartsVariant(), variant.getCustomData()));
+					variants.add(new SmartVariant(variant.getModel(), variant.getState().or(TRSRTransformation.identity()), uvLock, weight, variant.getTextures(), variant.getOnlyPartsVariant(), variant.getCustomData()));
 				}
 			}
 			list.add(new Variants(entry.getKey(), variants));
