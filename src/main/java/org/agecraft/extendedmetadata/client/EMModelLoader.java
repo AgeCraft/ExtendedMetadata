@@ -74,7 +74,7 @@ public class EMModelLoader {
 
 	public static void load(ModelLoader loader) {
 		try {
-			ExtendedMetadata.log.info("Loading models");
+			ExtendedMetadata.log.info("Loading block models");
 
 			createBlockState = EMUtil.getMethod(Block.class, "createBlockState", "func_180661_e", "e");
 			getSubmodelPermutations = EMUtil.getMethod(ForgeBlockStateV1.Deserializer.class, "getSubmodelPermutations", "getSubmodelPermutations", "getSubmodelPermutations", ForgeBlockStateV1.Variant.class, Map.class);
@@ -101,7 +101,7 @@ public class EMModelLoader {
 						EMBlockState blockState = GSON.fromJson(reader, EMBlockState.class);
 						map.put(entry.getValue(), loadModelBlockDefinition(entry.getKey(), blockState));
 					} catch(Exception e) {
-						throw new RuntimeException("Encountered an exception when loading model definition of \'" + entry.getValue() + "\' from: \'" + resource.getResourceLocation() + "\' in resourcepack: \'" + resource.getResourcePackName() + "\'", e);
+						throw new RuntimeException("Encountered an exception when loading block model definition of \'" + entry.getValue() + "\' from: \'" + resource.getResourceLocation() + "\' in resourcepack: \'" + resource.getResourcePackName() + "\'", e);
 					} finally {
 						IOUtils.closeQuietly(inputstream);
 					}
@@ -110,7 +110,7 @@ public class EMModelLoader {
 
 			blockDefinitions.set(loader, map);
 
-			ExtendedMetadata.log.info("Finished loading models");
+			ExtendedMetadata.log.info("Finished loading block models");
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}

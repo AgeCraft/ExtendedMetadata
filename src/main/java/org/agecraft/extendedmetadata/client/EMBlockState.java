@@ -53,9 +53,11 @@ public class EMBlockState {
 			}
 
 			for(Entry<String, JsonElement> entry : JsonUtils.getJsonObject(json, "variants").entrySet()) {
-				if(!entry.getKey().contains("=")) {
+				if(entry.getKey().equals("inventory")) {
+					ret.variantsJson.put(Collections.singleton(entry.getKey()), entry.getValue().getAsJsonObject());
+				} else if(!entry.getKey().contains("=")) {
 					for(Entry<String, JsonElement> e : entry.getValue().getAsJsonObject().entrySet()) {
-						ret.variantsJson.put(Collections.singletonList(entry.getKey() + "=" + e.getKey()), e.getValue().getAsJsonObject());
+						ret.variantsJson.put(Collections.singleton(entry.getKey() + "=" + e.getKey()), e.getValue().getAsJsonObject());
 					}
 
 				} else {
@@ -78,29 +80,62 @@ public class EMBlockState {
 	}
 
 	public void load(Block block, Map<String, IProperty> properties, ImmutableList<StateImplementation> states) throws Exception {
+		Collection<String> inventoryKey = Collections.singleton("inventory");
+		if(variantsJson.containsKey(inventoryKey)) {
+			Collection<JsonObject> values = variantsJson.get(inventoryKey);
+
+			List<Variant> list = Lists.newArrayList();
+
+			for(JsonObject json : values) {
+				list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(new Object[0], json), Variant.class));
+			}
+
+			list = Lists.reverse(list);
+
+			Variant variant = null;
+			for(Variant var : list) {
+				if(variant == null) {
+					variant = EMModelLoader.constructor.newInstance(var);
+				} else {
+					EMModelLoader.sync.invoke(variant, var);
+				}
+			}
+			if(defaults != null) {
+				EMModelLoader.sync.invoke(variant, defaults);
+			}
+
+			if(!variant.getSubmodels().isEmpty()) {
+				variants.putAll("inventory", (List<ForgeBlockStateV1.Variant>) EMModelLoader.getSubmodelPermutations.invoke(DESERIALIZER, variant, variant.getSubmodels()));
+			} else {
+				variants.put("inventory", variant);
+			}
+		}
+
 		for(StateImplementation state : states) {
 			List<Variant> list = Lists.newArrayList();
 
 			for(Entry<Collection<String>, Collection<JsonObject>> entry : variantsJson.asMap().entrySet()) {
-				Object[] variables = new Object[maxVariable + 1];
+				if(!entry.getKey().contains("invetory")) {
+					Object[] variables = new Object[maxVariable + 1];
 
-				boolean matches = true;
-				for(String key : entry.getKey()) {
-					String[] split = key.split("=");
+					boolean matches = true;
+					for(String key : entry.getKey()) {
+						String[] split = key.split("=");
 
-					IProperty property = properties.get(split[0]);
-					if(split[1].charAt(0) != '{' && !split[1].equals(property.getName(state.getValue(property)))) {
-						matches = false;
-						break;
+						IProperty property = properties.get(split[0]);
+						if(split[1].charAt(0) != '{' && !split[1].equals(property.getName(state.getValue(property)))) {
+							matches = false;
+							break;
+						}
+
+						if(split[1].charAt(0) == '{') {
+							variables[Integer.parseInt(split[1].substring(1, split[1].length() - 1))] = property.getName(state.getValue(property));
+						}
 					}
-
-					if(split[1].charAt(0) == '{') {
-						variables[Integer.parseInt(split[1].substring(1, split[1].length() - 1))] = property.getName(state.getValue(property));
-					}
-				}
-				if(matches) {
-					for(JsonObject json : entry.getValue()) {
-						list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(variables, json), Variant.class));
+					if(matches) {
+						for(JsonObject json : entry.getValue()) {
+							list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(variables, json), Variant.class));
+						}
 					}
 				}
 			}
