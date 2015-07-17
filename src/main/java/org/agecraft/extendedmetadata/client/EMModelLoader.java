@@ -111,7 +111,7 @@ public class EMModelLoader {
 
 			blockDefinitions.set(loader, map);
 
-			ExtendedMetadata.log.info("Finished loading block models");
+			ExtendedMetadata.log.info("Finished loading " + map.size() + " block models");
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}

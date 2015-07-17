@@ -68,7 +68,7 @@ public class ExtendedMetadataTest {
 	public static class BlockExtendedMetadata extends BlockBasicMetadata {
 
 		public static final String NAME = "extended_metadata";
-		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 4095);
+		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 1023);
 		public static final PropertyBool HALF = PropertyBool.create("half");
 
 		public BlockExtendedMetadata() {
