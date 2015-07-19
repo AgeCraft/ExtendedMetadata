@@ -55,7 +55,7 @@ public class EMBlockState {
 
 			for(Entry<String, JsonElement> entry : JsonUtils.getJsonObject(json, "variants").entrySet()) {
 				if(entry.getKey().equals("inventory")) {
-					ret.variantsJson.put(INVENTORY_KEY, entry.getValue().getAsJsonObject());
+					//ret.variantsJson.put(INVENTORY_KEY, entry.getValue().getAsJsonObject());
 				} else if(!entry.getKey().contains("=")) {
 					for(Entry<String, JsonElement> e : entry.getValue().getAsJsonObject().entrySet()) {
 						ret.variantsJson.put(Collections.singleton(entry.getKey() + "=" + e.getKey()), e.getValue().getAsJsonObject());
@@ -81,36 +81,36 @@ public class EMBlockState {
 	}
 
 	public void load(Block block, Map<String, IProperty> properties, ImmutableList<StateImplementation> states) throws Exception {
-		if(variantsJson.containsKey(INVENTORY_KEY)) {
-			Collection<JsonObject> values = variantsJson.get(INVENTORY_KEY);
-
-			List<Variant> list = Lists.newArrayList();
-
-			for(JsonObject json : values) {
-				list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(new Object[0], json), Variant.class));
-			}
-
-			list = Lists.reverse(list);
-
-			Variant variant = null;
-			for(Variant var : list) {
-				if(variant == null) {
-					variant = EMModelLoader.constructor.newInstance(var);
-				} else {
-					EMModelLoader.sync.invoke(variant, var);
-				}
-			}
-			if(defaults != null) {
-				EMModelLoader.sync.invoke(variant, defaults);
-			}
-
-			if(!variant.getSubmodels().isEmpty()) {
-				variants.putAll("inventory", (List<ForgeBlockStateV1.Variant>) EMModelLoader.getSubmodelPermutations.invoke(DESERIALIZER, variant, variant.getSubmodels()));
-			} else {
-				variants.put("inventory", variant);
-			}
-		}
-		variantsJson.removeAll(INVENTORY_KEY);
+//		if(variantsJson.containsKey(INVENTORY_KEY)) {
+//			Collection<JsonObject> values = variantsJson.get(INVENTORY_KEY);
+//
+//			List<Variant> list = Lists.newArrayList();
+//
+//			for(JsonObject json : values) {
+//				list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(new Object[0], json), Variant.class));
+//			}
+//
+//			list = Lists.reverse(list);
+//
+//			Variant variant = null;
+//			for(Variant var : list) {
+//				if(variant == null) {
+//					variant = EMModelLoader.constructor.newInstance(var);
+//				} else {
+//					EMModelLoader.sync.invoke(variant, var);
+//				}
+//			}
+//			if(defaults != null) {
+//				EMModelLoader.sync.invoke(variant, defaults);
+//			}
+//
+//			if(!variant.getSubmodels().isEmpty()) {
+//				variants.putAll("inventory", (List<ForgeBlockStateV1.Variant>) EMModelLoader.getSubmodelPermutations.invoke(DESERIALIZER, variant, variant.getSubmodels()));
+//			} else {
+//				variants.put("inventory", variant);
+//			}
+//		}
+//		variantsJson.removeAll(INVENTORY_KEY);
 		
 		for(StateImplementation state : states) {
 			List<Variant> list = Lists.newArrayList();

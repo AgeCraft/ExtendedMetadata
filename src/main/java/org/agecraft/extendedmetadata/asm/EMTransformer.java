@@ -1,5 +1,6 @@
 package org.agecraft.extendedmetadata.asm;
 
+import java.io.File;
 import java.util.ListIterator;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import codechicken.lib.asm.ASMBlock;
+import codechicken.lib.asm.ASMHelper;
 import codechicken.lib.asm.ASMReader;
 import codechicken.lib.asm.InsnComparator;
 import codechicken.lib.asm.InsnListSection;
@@ -321,7 +323,8 @@ public class EMTransformer implements IClassTransformer {
 			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_1"), asmblocks.get("playAusSFX_1")));
 			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_2"), asmblocks.get("playAusSFX_2")));
 
-			final ASMBlock injection = asmblocks.get("setupModelRegistry");
+			final ASMBlock injection1 = asmblocks.get("setupModelRegistry");
+			final ASMBlock injection2 = asmblocks.get("loadItems");
 			transformer.add(new ClassNodeTransformer() {
 				@Override
 				public String className() {
@@ -330,9 +333,12 @@ public class EMTransformer implements IClassTransformer {
 
 				@Override
 				public void transform(ClassNode node) {
+					ASMHelper.dump(node, new File(EMCorePlugin.location, "../test"), true, true);
 					for(MethodNode methodNode : node.methods) {
 						if(methodNode.name.equals("setupModelRegistry") && methodNode.desc.equals("()Lnet/minecraft/util/IRegistry;")) {
-							methodNode.instructions.insert(injection.rawListCopy());
+							methodNode.instructions.insert(injection1.rawListCopy());
+						} else if(methodNode.name.equals("loadItems") && methodNode.desc.equals("()V")) {
+							methodNode.instructions.insert(injection2.rawListCopy());
 						}
 					}
 				}

@@ -17,6 +17,9 @@
 					"bottom": "#all"
 				}
 			}
+		},
+		"inventory": {
+			"transform": "forge:default-block"
 		}
 	}
 }

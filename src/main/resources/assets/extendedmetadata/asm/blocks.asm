@@ -113,7 +113,11 @@ INVOKEVIRTUAL net/minecraft/block/Block.func_176203_a (I)Lnet/minecraft/block/st
 # net.minecraftforge.client.model.ModelLoader
 list setupModelRegistry
 ALOAD 0
-INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.load (Lnet/minecraftforge/client/model/ModelLoader;)V;
+INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.load (Lnet/minecraftforge/client/model/ModelLoader;)V
+
+list loadItems
+ALOAD 0
+INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.loadBlockInventoryModels (Lnet/minecraftforge/client/model/ModelLoader;)V
 
 # net.minecraft.block.state.BlockState
 list buildPropertyValueTable

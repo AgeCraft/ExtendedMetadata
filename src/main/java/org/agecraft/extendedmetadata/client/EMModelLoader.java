@@ -29,6 +29,7 @@ import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ForgeBlockStateV1;
 import net.minecraftforge.client.model.ForgeBlockStateV1.TRSRDeserializer;
+import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.fml.common.registry.GameData;
@@ -39,6 +40,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -53,17 +55,17 @@ public class EMModelLoader {
 	protected static Method getSubmodelPermutations;
 	protected static Constructor<ForgeBlockStateV1.Variant> constructor;
 	protected static Method sync;
+	private static Class<? extends Variant> smartVariant;
+	private static Constructor<? extends Variant> smartVariantConstructor;
 
 	private static HashMap<Block, ResourceLocation> blocks = Maps.newHashMap();
 
 	public static void registerBlock(Block block) {
-		ResourceLocation tmp = (ResourceLocation) GameData.getBlockRegistry().getNameForObject(block);
-		registerBlock(block, new ResourceLocation(tmp.getResourceDomain(), "blockstates/" + tmp.getResourcePath() + ".json"));
+		registerBlock(block, getBlockStateLocation((ResourceLocation) GameData.getBlockRegistry().getNameForObject(block)));
 	}
 
 	public static void registerBlock(Block block, String name) {
-		ResourceLocation tmp = new ResourceLocation(name);
-		registerBlock(block, new ResourceLocation(tmp.getResourceDomain(), "blockstates/" + tmp.getResourcePath() + ".json"));
+		registerBlock(block, getBlockStateLocation(new ResourceLocation(name)));
 	}
 
 	public static void registerBlock(Block block, ResourceLocation location) {
@@ -74,6 +76,10 @@ public class EMModelLoader {
 		blocks.remove(block);
 	}
 
+	public static ResourceLocation getBlockStateLocation(ResourceLocation location) {
+		return new ResourceLocation(location.getResourceDomain(), "blockstates/" + location.getResourcePath() + ".json");
+	}
+
 	public static void load(ModelLoader loader) {
 		try {
 			ExtendedMetadata.log.info("Loading block models");
@@ -82,6 +88,9 @@ public class EMModelLoader {
 			getSubmodelPermutations = EMUtil.getMethod(ForgeBlockStateV1.Deserializer.class, "getSubmodelPermutations", "getSubmodelPermutations", "getSubmodelPermutations", ForgeBlockStateV1.Variant.class, Map.class);
 			constructor = EMUtil.getConstructor(ForgeBlockStateV1.Variant.class, ForgeBlockStateV1.Variant.class);
 			sync = EMUtil.getMethod(ForgeBlockStateV1.Variant.class, "sync", "sync", "sync", ForgeBlockStateV1.Variant.class);
+
+			smartVariant = (Class<? extends Variant>) Class.forName("net.minecraftforge.client.model.BlockStateLoader$ForgeVariant");
+			smartVariantConstructor = EMUtil.getConstructor(smartVariant, ResourceLocation.class, IModelState.class, boolean.class, int.class, ImmutableMap.class, ImmutableMap.class, ImmutableMap.class);
 
 			blockDefinitions = EMUtil.getField(ModelBakery.class, "blockDefinitions", "field_177614_t", "t");
 			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) blockDefinitions.get(loader);
@@ -101,7 +110,7 @@ public class EMModelLoader {
 						reader = new InputStreamReader(new ByteArrayInputStream(data), Charsets.UTF_8);
 
 						EMBlockState blockState = GSON.fromJson(reader, EMBlockState.class);
-						map.put(entry.getValue(), loadModelBlockDefinition(entry.getKey(), blockState));
+						map.put(entry.getValue(), loadModelBlockDefinition(entry.getKey(), entry.getValue(), blockState));
 					} catch(Exception e) {
 						throw new RuntimeException("Encountered an exception when loading block model definition of \'" + entry.getValue() + "\' from: \'" + resource.getResourceLocation() + "\' in resourcepack: \'" + resource.getResourcePackName() + "\'", e);
 					} finally {
@@ -118,7 +127,33 @@ public class EMModelLoader {
 		}
 	}
 
-	private static ModelBlockDefinition loadModelBlockDefinition(Block block, EMBlockState blockState) throws Exception {
+	public static void loadBlockInventoryModels(ModelLoader loader) {
+//		try {
+//			ExtendedMetadata.log.info("Loading block models");
+//
+//			ExtendedMetadata.log.info("Finished loading " + map.size() + " block models");
+//		} catch(Exception e) {
+//			throw new RuntimeException(e);
+//		}
+		
+		// ExtendedMetadata.log.info("INVENTORY LOADER");
+		// try {
+		// ResourceLocation blockStateLocation = getBlockStateLocation(location);
+		// ModelBlockDefinition model = blockInventoryModels.get(blockStateLocation);
+		// System.out.println("models: " + blockInventoryModels);
+		// System.out.println("location: " + blockStateLocation);
+		// if(model != null) {
+		// System.out.println("YUP");
+		// Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) blockDefinitions.get(loader);
+		// map.put(blockStateLocation, model);
+		// blockDefinitions.set(loader, map);
+		// }
+		// } catch(Exception e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	private static ModelBlockDefinition loadModelBlockDefinition(Block block, ResourceLocation location, EMBlockState blockState) throws Exception {
 		BlockState state = ((BlockState) createBlockState.invoke(block));
 		ImmutableList<StateImplementation> states = state.getValidStates();
 
@@ -140,12 +175,12 @@ public class EMModelLoader {
 				if(variant.getModel() != null && variant.getSubmodels().size() == 0 && variant.getTextures().size() == 0 && variant.getCustomData().size() == 0 && variant.getState().orNull() instanceof ModelRotation) {
 					variants.add(new Variant(variant.getModel(), (ModelRotation) variant.getState().get(), uvLock, weight));
 				} else {
-					variants.add(new SmartVariant(variant.getModel(), variant.getState().or(TRSRTransformation.identity()), uvLock, weight, variant.getTextures(), variant.getOnlyPartsVariant(), variant.getCustomData()));
+					variants.add(smartVariantConstructor.newInstance(variant.getModel(), variant.getState().or(TRSRTransformation.identity()), uvLock, weight, variant.getTextures(), variant.getOnlyPartsVariant(), variant.getCustomData()));
 				}
 			}
+
 			list.add(new Variants(entry.getKey(), variants));
 		}
-
 		return new ModelBlockDefinition((Collection) list);
 	}
 
