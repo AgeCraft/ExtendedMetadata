@@ -1,4 +1,7 @@
 {
+	"defaults": {
+		"transform": "forge:default-block"
+	},
 	"variants": {
 		"value={0}": {
 			"textures": {
@@ -19,7 +22,7 @@
 			}
 		},
 		"inventory": {
-			"transform": "forge:default-block"
+			"model": "minecraft:cube_all"
 		}
 	}
 }

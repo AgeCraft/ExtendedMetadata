@@ -66,9 +66,11 @@ public class ExtendedMetadataTest {
 	}
 
 	public static class BlockExtendedMetadata extends BlockBasicMetadata {
+		
+		public static final int VALUE_SIZE = 31;
 
 		public static final String NAME = "extended_metadata";
-		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, 1023);
+		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, VALUE_SIZE);
 		public static final PropertyBool HALF = PropertyBool.create("half");
 
 		public BlockExtendedMetadata() {
@@ -126,7 +128,7 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public int damageDropped(IBlockState state) {
-			return getMetaFromState(state);
+			return getMetaFromState(state) >> 1;
 		}
 
 		@Override
@@ -156,8 +158,8 @@ public class ExtendedMetadataTest {
 			list.add(new ItemStack(item, 1, 255));
 			list.add(new ItemStack(item, 1, 256));
 			list.add(new ItemStack(item, 1, 300));
-			list.add(new ItemStack(item, 1, 1023));
-			list.add(new ItemStack(item, 1, 4095));
+			list.add(new ItemStack(item, 1, VALUE_SIZE));
+			//list.add(new ItemStack(item, 1, 4095));
 		}
 	}
 }

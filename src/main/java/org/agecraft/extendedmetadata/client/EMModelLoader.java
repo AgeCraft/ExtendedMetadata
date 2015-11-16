@@ -128,14 +128,47 @@ public class EMModelLoader {
 	}
 
 	public static void loadBlockInventoryModels(ModelLoader loader) {
-//		try {
-//			ExtendedMetadata.log.info("Loading block models");
-//
-//			ExtendedMetadata.log.info("Finished loading " + map.size() + " block models");
-//		} catch(Exception e) {
-//			throw new RuntimeException(e);
-//		}
-		
+		try {
+			ExtendedMetadata.log.info("Loading block item models");
+
+			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) blockDefinitions.get(loader);
+			HashMap<ResourceLocation, ModelBlockDefinition> itemMap = Maps.newHashMap();
+
+			IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
+
+			ExtendedMetadata.log.info(blocks);
+			
+			for(Entry<Block, ResourceLocation> entry : blocks.entrySet()) {
+				Iterator<IResource> iterator = resourceManager.getAllResources(entry.getValue()).iterator();
+
+				while(iterator.hasNext()) {
+					IResource resource = (IResource) iterator.next();
+					InputStream inputstream = null;
+					try {
+						inputstream = resource.getInputStream();
+						Reader reader = new InputStreamReader(inputstream, Charsets.UTF_8);
+						byte[] data = IOUtils.toByteArray(reader);
+						reader = new InputStreamReader(new ByteArrayInputStream(data), Charsets.UTF_8);
+						
+						ExtendedMetadata.log.info("Loading block item model for " + entry.getValue() + " from " + resource.getResourceLocation() + " in " + resource.getResourcePackName());
+						
+						//TODO: load block item model
+					} catch(Exception e) {
+						throw new RuntimeException("Encountered an exception when loading block item model definition of \'" + entry.getValue() + "\' from: \'" + resource.getResourceLocation() + "\' in resourcepack: \'" + resource.getResourcePackName() + "\'", e);
+					} finally {
+						IOUtils.closeQuietly(inputstream);
+					}
+				}
+			}
+
+			map.putAll(itemMap);
+			blockDefinitions.set(loader, map);
+
+			ExtendedMetadata.log.info("Finished loading " + itemMap.size() + " block item models");
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+
 		// ExtendedMetadata.log.info("INVENTORY LOADER");
 		// try {
 		// ResourceLocation blockStateLocation = getBlockStateLocation(location);

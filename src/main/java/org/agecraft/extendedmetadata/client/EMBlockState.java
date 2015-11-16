@@ -9,12 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockState.StateImplementation;
-import net.minecraft.util.JsonUtils;
-import net.minecraftforge.client.model.ForgeBlockStateV1;
-import net.minecraftforge.client.model.ForgeBlockStateV1.Variant;
+import org.agecraft.extendedmetadata.ExtendedMetadata;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -28,6 +23,13 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState.StateImplementation;
+import net.minecraft.util.JsonUtils;
+import net.minecraftforge.client.model.ForgeBlockStateV1;
+import net.minecraftforge.client.model.ForgeBlockStateV1.Variant;
 
 public class EMBlockState {
 
@@ -55,7 +57,7 @@ public class EMBlockState {
 
 			for(Entry<String, JsonElement> entry : JsonUtils.getJsonObject(json, "variants").entrySet()) {
 				if(entry.getKey().equals("inventory")) {
-					//ret.variantsJson.put(INVENTORY_KEY, entry.getValue().getAsJsonObject());
+					ret.variantsJson.put(INVENTORY_KEY, entry.getValue().getAsJsonObject());
 				} else if(!entry.getKey().contains("=")) {
 					for(Entry<String, JsonElement> e : entry.getValue().getAsJsonObject().entrySet()) {
 						ret.variantsJson.put(Collections.singleton(entry.getKey() + "=" + e.getKey()), e.getValue().getAsJsonObject());
@@ -81,36 +83,40 @@ public class EMBlockState {
 	}
 
 	public void load(Block block, Map<String, IProperty> properties, ImmutableList<StateImplementation> states) throws Exception {
-//		if(variantsJson.containsKey(INVENTORY_KEY)) {
-//			Collection<JsonObject> values = variantsJson.get(INVENTORY_KEY);
-//
-//			List<Variant> list = Lists.newArrayList();
-//
-//			for(JsonObject json : values) {
-//				list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(new Object[0], json), Variant.class));
-//			}
-//
-//			list = Lists.reverse(list);
-//
-//			Variant variant = null;
-//			for(Variant var : list) {
-//				if(variant == null) {
-//					variant = EMModelLoader.constructor.newInstance(var);
-//				} else {
-//					EMModelLoader.sync.invoke(variant, var);
-//				}
-//			}
-//			if(defaults != null) {
-//				EMModelLoader.sync.invoke(variant, defaults);
-//			}
-//
-//			if(!variant.getSubmodels().isEmpty()) {
-//				variants.putAll("inventory", (List<ForgeBlockStateV1.Variant>) EMModelLoader.getSubmodelPermutations.invoke(DESERIALIZER, variant, variant.getSubmodels()));
-//			} else {
-//				variants.put("inventory", variant);
-//			}
-//		}
-//		variantsJson.removeAll(INVENTORY_KEY);
+		if(variantsJson.containsKey(INVENTORY_KEY)) {
+			ExtendedMetadata.log.info("Inventory key found on " + block);
+			Collection<JsonObject> values = variantsJson.get(INVENTORY_KEY);
+
+			List<Variant> list = Lists.newArrayList();
+
+			for(JsonObject json : values) {
+				// Make a copy of the JSON object and replace the variables
+				list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(new Object[0], json), Variant.class));
+			}
+
+			list = Lists.reverse(list);
+
+			Variant variant = null;
+			for(Variant var : list) {
+				if(variant == null) {
+					variant = EMModelLoader.constructor.newInstance(var);
+				} else {
+					EMModelLoader.sync.invoke(variant, var);
+				}
+			}
+			if(defaults != null) {
+				ExtendedMetadata.log.info("Loading defaults for this inventory model");
+				EMModelLoader.sync.invoke(variant, defaults);
+			}
+
+			System.out.println("Adding it as list: " + !variant.getSubmodels().isEmpty());
+			if(!variant.getSubmodels().isEmpty()) {
+				variants.putAll("inventory", (List<ForgeBlockStateV1.Variant>) EMModelLoader.getSubmodelPermutations.invoke(DESERIALIZER, variant, variant.getSubmodels()));
+			} else {
+				variants.put("inventory", variant);
+			}
+		}
+		variantsJson.removeAll(INVENTORY_KEY);
 		
 		for(StateImplementation state : states) {
 			List<Variant> list = Lists.newArrayList();
@@ -134,6 +140,7 @@ public class EMBlockState {
 				}
 				if(matches) {
 					for(JsonObject json : entry.getValue()) {
+						// Make a copy of the JSON object and replace the variables
 						list.add((Variant) EMModelLoader.GSON.fromJson(replaceObjectVariables(variables, json), Variant.class));
 					}
 				}

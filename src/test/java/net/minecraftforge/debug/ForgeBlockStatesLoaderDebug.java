@@ -61,10 +61,10 @@ public class ForgeBlockStatesLoaderDebug {
 
 	@SideOnly(Side.CLIENT)
 	public void preInitClient(FMLPreInitializationEvent event) {
-		ModelLoader.setCustomStateMapper(blockCustom, new StateMap.Builder().setProperty(CustomMappedBlock.VARIANT).build());
+		ModelLoader.setCustomStateMapper(blockCustom, new StateMap.Builder().withName(CustomMappedBlock.VARIANT).build());
 
 		ModelLoader.setCustomStateMapper(blockCustomWall, new IStateMapper() {
-			StateMap stateMap = new StateMap.Builder().setProperty(BlockWall.VARIANT).setBuilderSuffix("_wall").build();
+			StateMap stateMap = new StateMap.Builder().withName(BlockWall.VARIANT).withSuffix("_wall").build();
 
 			@Override
 			public Map putStateModelLocations(Block block) {
@@ -114,7 +114,8 @@ public class ForgeBlockStatesLoaderDebug {
 		}
 
 		public static enum CustomVariant implements IStringSerializable {
-			TypeA, TypeB;
+			TypeA,
+			TypeB;
 
 			public String getName() {
 				return this.toString();
