@@ -14,6 +14,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.agecraft.extendedmetadata.EMUtil;
+import org.agecraft.extendedmetadata.ExtendedMetadata;
+import org.apache.commons.io.IOUtils;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
@@ -33,18 +45,6 @@ import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.fml.common.registry.GameData;
-
-import org.agecraft.extendedmetadata.EMUtil;
-import org.agecraft.extendedmetadata.ExtendedMetadata;
-import org.apache.commons.io.IOUtils;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class EMModelLoader {
 
@@ -97,7 +97,7 @@ public class EMModelLoader {
 
 			IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
 
-			for(Entry<Block, ResourceLocation> entry : blocks.entrySet()) {
+			for(Entry<Block, ResourceLocation> entry : blocks.entrySet()) {				
 				Iterator<IResource> iterator = resourceManager.getAllResources(entry.getValue()).iterator();
 
 				while(iterator.hasNext()) {
@@ -127,6 +127,7 @@ public class EMModelLoader {
 		}
 	}
 
+	// Might want to use this, but it currently does nothing
 	public static void loadBlockInventoryModels(ModelLoader loader) {
 		try {
 			ExtendedMetadata.log.info("Loading block item models");
@@ -136,8 +137,6 @@ public class EMModelLoader {
 
 			IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
 
-			ExtendedMetadata.log.info(blocks);
-			
 			for(Entry<Block, ResourceLocation> entry : blocks.entrySet()) {
 				Iterator<IResource> iterator = resourceManager.getAllResources(entry.getValue()).iterator();
 
@@ -149,10 +148,10 @@ public class EMModelLoader {
 						Reader reader = new InputStreamReader(inputstream, Charsets.UTF_8);
 						byte[] data = IOUtils.toByteArray(reader);
 						reader = new InputStreamReader(new ByteArrayInputStream(data), Charsets.UTF_8);
+
+						//TODO: load block item model
 						
 						ExtendedMetadata.log.info("Loading block item model for " + entry.getValue() + " from " + resource.getResourceLocation() + " in " + resource.getResourcePackName());
-						
-						//TODO: load block item model
 					} catch(Exception e) {
 						throw new RuntimeException("Encountered an exception when loading block item model definition of \'" + entry.getValue() + "\' from: \'" + resource.getResourceLocation() + "\' in resourcepack: \'" + resource.getResourcePackName() + "\'", e);
 					} finally {

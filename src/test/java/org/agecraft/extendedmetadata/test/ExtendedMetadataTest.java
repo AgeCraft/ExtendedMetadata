@@ -2,12 +2,17 @@ package org.agecraft.extendedmetadata.test;
 
 import java.util.List;
 
+import org.agecraft.extendedmetadata.BlockBasicMetadata;
+import org.agecraft.extendedmetadata.ItemBlockMetadata;
+import org.agecraft.extendedmetadata.client.EMModelLoader;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -20,15 +25,12 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-
-import org.agecraft.extendedmetadata.BlockBasicMetadata;
-import org.agecraft.extendedmetadata.ItemBlockMetadata;
-import org.agecraft.extendedmetadata.client.EMModelLoader;
 
 @Mod(modid = ExtendedMetadataTest.MOD_ID, name = ExtendedMetadataTest.MOD_ID, version = ExtendedMetadataTest.VERSION)
 public class ExtendedMetadataTest {
@@ -62,6 +64,14 @@ public class ExtendedMetadataTest {
 		@Override
 		public void preInit() {
 			EMModelLoader.registerBlock(block);
+
+			//TODO: make EMModelLoader register these automatically
+			
+			// Register custom block item model mapping
+			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(MOD_ID.toLowerCase() + ":" + BlockExtendedMetadata.NAME, "inventory"));
+			
+			// Not sure if this is required, EMModelLoader probably handles it already
+			ModelLoader.addVariantName(Item.getItemFromBlock(block), MOD_ID.toLowerCase() + ":" + BlockExtendedMetadata.NAME);
 		}
 	}
 
@@ -94,7 +104,7 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-			IBlockState state = getDefaultState().withProperty(VALUE, meta & 32767);
+			IBlockState state = getDefaultState().withProperty(VALUE, meta >> 1).withProperty(HALF, Boolean.valueOf((meta & 1) == 1));
 			if(!world.isRemote) {
 				placer.addChatMessage(new ChatComponentText("Placing metadata: " + state.getValue(VALUE)));
 			}
@@ -128,7 +138,7 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public int damageDropped(IBlockState state) {
-			return getMetaFromState(state) >> 1;
+			return getMetaFromState(state) & ~1;
 		}
 
 		@Override
@@ -140,7 +150,7 @@ public class ExtendedMetadataTest {
 		public int getMetaFromState(IBlockState state) {
 			return (((Integer) state.getValue(VALUE)).intValue() << 1) | (((Boolean) state.getValue(HALF)).booleanValue() ? 1 : 0);
 		}
-
+		
 		@Override
 		protected BlockState createBlockState() {
 			return new BlockState(this, VALUE, HALF);
@@ -150,16 +160,15 @@ public class ExtendedMetadataTest {
 		@Override
 		public void getSubBlocks(Item item, CreativeTabs tab, List list) {
 			for(int i = 0; i < 16; i++) {
-				list.add(new ItemStack(item, 1, i));
+				list.add(new ItemStack(item, 1, i << 1));
 			}
-			list.add(new ItemStack(item, 1, 63));
-			list.add(new ItemStack(item, 1, 127));
-			list.add(new ItemStack(item, 1, 128));
-			list.add(new ItemStack(item, 1, 255));
-			list.add(new ItemStack(item, 1, 256));
-			list.add(new ItemStack(item, 1, 300));
-			list.add(new ItemStack(item, 1, VALUE_SIZE));
-			//list.add(new ItemStack(item, 1, 4095));
+			list.add(new ItemStack(item, 1, 63 << 1));
+			list.add(new ItemStack(item, 1, 127 << 1));
+			list.add(new ItemStack(item, 1, 128 << 1));
+			list.add(new ItemStack(item, 1, 255 << 1));
+			list.add(new ItemStack(item, 1, 256 << 1));
+			list.add(new ItemStack(item, 1, 300 << 1));
+			list.add(new ItemStack(item, 1, VALUE_SIZE << 1));
 		}
 	}
 }

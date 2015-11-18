@@ -109,7 +109,7 @@ public class EMBlockState {
 				EMModelLoader.sync.invoke(variant, defaults);
 			}
 
-			System.out.println("Adding it as list: " + !variant.getSubmodels().isEmpty());
+			ExtendedMetadata.log.info("Adding it as list: " + !variant.getSubmodels().isEmpty());
 			if(!variant.getSubmodels().isEmpty()) {
 				variants.putAll("inventory", (List<ForgeBlockStateV1.Variant>) EMModelLoader.getSubmodelPermutations.invoke(DESERIALIZER, variant, variant.getSubmodels()));
 			} else {
