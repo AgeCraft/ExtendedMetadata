@@ -9,5 +9,4 @@ dependencies:
     - chmod +x gradlew
 test:
   pre:
-    - chmod +x gradlew
     - gradle build
