@@ -15,6 +15,7 @@ eclipse
 .classpath
 .project
 bin
+*.launch
 
 ## IntelliJ
 out
@@ -29,4 +30,3 @@ atlassian-ide-plugin.xml
 
 ## Project
 libs
-

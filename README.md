@@ -100,7 +100,7 @@ EMModelLoader.registerBlockItemModel(block, 14, "inventory14");
 ```
 
 ## Dependencies
-* [Minecraft Forge](http://minecraftforge.net) 11.14.3.1487 or higher
+* [Minecraft Forge](http://minecraftforge.net) 11.14.4.1563 or higher
 * [CodeChickenCore](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.0.5.34 or higher
 * [CodeChickenLib](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.1.2.133 or higher
 

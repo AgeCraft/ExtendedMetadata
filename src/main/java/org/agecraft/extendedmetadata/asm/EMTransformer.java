@@ -1,6 +1,5 @@
 package org.agecraft.extendedmetadata.asm;
 
-import java.io.File;
 import java.util.ListIterator;
 import java.util.Map;
 
@@ -18,7 +17,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import codechicken.lib.asm.ASMBlock;
-import codechicken.lib.asm.ASMHelper;
 import codechicken.lib.asm.ASMReader;
 import codechicken.lib.asm.InsnComparator;
 import codechicken.lib.asm.InsnListSection;
@@ -331,7 +329,6 @@ public class EMTransformer implements IClassTransformer {
 
 				@Override
 				public void transform(ClassNode node) {
-					ASMHelper.dump(node, new File(EMCorePlugin.location, "../test"), true, true);
 					for(MethodNode methodNode : node.methods) {
 						if(methodNode.name.equals("setupModelRegistry") && methodNode.desc.equals("()Lnet/minecraft/util/IRegistry;")) {
 							methodNode.instructions.insert(injection.rawListCopy());
