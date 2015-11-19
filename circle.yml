@@ -5,9 +5,9 @@ general:
   artifacts: 
     - build/libs
 dependencies:
-	pre:
-		- chmod +x gradlew
+  pre:
+    - chmod +x gradlew
 test:
   pre:
-  	- chmod +x gradlew
+    - chmod +x gradlew
     - gradle build
