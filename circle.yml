@@ -6,4 +6,4 @@ general:
     - build/libs
 test:
   pre:
-    - ./gradlew build
+    - gradle build
