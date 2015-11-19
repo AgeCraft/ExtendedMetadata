@@ -115,10 +115,6 @@ list setupModelRegistry
 ALOAD 0
 INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.load (Lnet/minecraftforge/client/model/ModelLoader;)V
 
-list loadItems
-ALOAD 0
-INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.loadBlockInventoryModels (Lnet/minecraftforge/client/model/ModelLoader;)V
-
 # net.minecraft.block.state.BlockState
 list buildPropertyValueTable
 ALOAD 0

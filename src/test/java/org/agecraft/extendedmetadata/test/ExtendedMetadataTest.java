@@ -12,7 +12,6 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -25,7 +24,6 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -63,21 +61,20 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public void preInit() {
+			// Register block to use ExtendedMetadata's blockstate format
 			EMModelLoader.registerBlock(block);
-
-			//TODO: make EMModelLoader register these automatically
 			
-			// Register custom block item model mapping
-			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(MOD_ID.toLowerCase() + ":" + BlockExtendedMetadata.NAME, "inventory"));
+			// Register the default item models for the block
+			EMModelLoader.registerBlockItemModels(block);
 			
-			// Not sure if this is required, EMModelLoader probably handles it already
-			ModelLoader.addVariantName(Item.getItemFromBlock(block), MOD_ID.toLowerCase() + ":" + BlockExtendedMetadata.NAME);
+			// Register a custom item model for the block
+			EMModelLoader.registerBlockItemModel(block, 14, "inventory14");
 		}
 	}
 
 	public static class BlockExtendedMetadata extends BlockBasicMetadata {
 		
-		public static final int VALUE_SIZE = 31;
+		public static final int VALUE_SIZE = 15;
 
 		public static final String NAME = "extended_metadata";
 		public static final PropertyInteger VALUE = PropertyInteger.create("value", 0, VALUE_SIZE);
@@ -95,7 +92,7 @@ public class ExtendedMetadataTest {
 		@Override
 		public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
 			if(!world.isRemote) {
-				player.addChatMessage(new ChatComponentText("Metadata: " + state.getValue(VALUE)));
+				player.addChatMessage(new ChatComponentText("Color: " + state.getValue(VALUE)));
 
 				world.setBlockState(pos, state.withProperty(HALF, !Boolean.valueOf((Boolean) state.getValue(HALF))));
 			}
@@ -106,7 +103,7 @@ public class ExtendedMetadataTest {
 		public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
 			IBlockState state = getDefaultState().withProperty(VALUE, meta >> 1).withProperty(HALF, Boolean.valueOf((meta & 1) == 1));
 			if(!world.isRemote) {
-				placer.addChatMessage(new ChatComponentText("Placing metadata: " + state.getValue(VALUE)));
+				placer.addChatMessage(new ChatComponentText("Placing color: " + state.getValue(VALUE)));
 			}
 			return state;
 		}
@@ -156,19 +153,12 @@ public class ExtendedMetadataTest {
 			return new BlockState(this, VALUE, HALF);
 		}
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
 		@Override
 		public void getSubBlocks(Item item, CreativeTabs tab, List list) {
 			for(int i = 0; i < 16; i++) {
 				list.add(new ItemStack(item, 1, i << 1));
+				list.add(new ItemStack(item, 1, i << 1 | 1));
 			}
-			list.add(new ItemStack(item, 1, 63 << 1));
-			list.add(new ItemStack(item, 1, 127 << 1));
-			list.add(new ItemStack(item, 1, 128 << 1));
-			list.add(new ItemStack(item, 1, 255 << 1));
-			list.add(new ItemStack(item, 1, 256 << 1));
-			list.add(new ItemStack(item, 1, 300 << 1));
-			list.add(new ItemStack(item, 1, VALUE_SIZE << 1));
 		}
 	}
 }

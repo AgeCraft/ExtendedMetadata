@@ -12,13 +12,92 @@ So that's why this mod only fully increases block metadata and not block IDs, be
 For those that are curious how this mod was made: I forked Minecraft Forge and setup the contributor environment (https://github.com/MinecraftForge/MinecraftForge/wiki/If-you-want-to-contribute-to-Forge) and started looking through the decompiled Minecraft code to get an idea of the internals of block states, chunk storage and chunk networking. While I was making changes to the source code I wrote down all the fields and/or methods I changed. This simplified making the coremod because I already knew where to change what, all that was left todo was search the corresponding bytecode and setup the ASM transformations for it. This is quite a tedious process, but CodeChickenLib/CodeChickenCore and the Bytecode Outline plugin for Eclipse (http://marketplace.eclipse.org/content/bytecode-outline) helped a lot.
 
 ## Warning
-This increases the amount of disk storage and network bandwidth being used. This in can cause lag, you have been warned.
-Also be careful with the 1.8 model / texture loader, using too much metadata can cause out of memory errors. The solution for this is a custom model or texture loader, we are working on implementing something like that, but it might take some time to perfect.
+This mod changes the way your world is stored on disk. Old worlds get converted automatically, but you can't open worlds touched by ExtendedMetadata using vanilla Minecraft or Forge.
+ExtendedMetadata also increases the amount of disk storage and network bandwidth being used. This in can cause lag, you have been warned.
+Also be careful with the 1.8 model / texture loader, using too much metadata can cause out of memory errors. The solution for this is a custom model or texture loader, we have implemented this, but it might take some time to perfect.
 
 ## Blockstate / Model Loader
-ExtendedMetadata also adds an improved blockstate / model loader, example: https://github.com/AgeCraft/ExtendedMetadata/blob/master/src/test/resources/assets/extendedmetadatatest/blockstates/extended_metadata.json
+ExtendedMetadata also adds an improved blockstate / model loader, example: 
+* Implementation: https://github.com/AgeCraft/ExtendedMetadata/blob/1.8/src/test/java/org/agecraft/extendedmetadata/test/ExtendedMetadataTest.java
+* Blockstate JSON: https://github.com/AgeCraft/ExtendedMetadata/blob/1.8/src/test/resources/assets/extendedmetadatatest/blockstates/extended_metadata.json
 
-Note that a variable (a number between `{}`) is bound to a property, it can be used in multiple places as long as the property name stays the same. 
+### Format
+Here you can find the Forge format for reference: http://mcforge.readthedocs.org/en/latest/blockstates/forgeBlockstates/.
+
+Basically there are three parts to the blockstate JSON file: `defaults`, `variants` and `customVariants`.
+In defaults you can specify defaults exactly as you would in the Forge format.
+
+In variants you have three ways of declaring your block states:
+* Fully qualified property string (for example: `half=false,value=0`)
+* A single property with all of it's values below (for example: `half`)
+* One or more properties with variables (for example: `value={0}` or `half=false,value={0]` or `half={1},value={1}`). Note that a variable (a number between `{}`) is bound to a property, it can be used in multiple places as long as the property name stays the same. 
+
+In the JSON objects assigned to these keys you can specify variants just like you would in the Forge format.
+
+In the last part, custom variants, you can define custom states, which are saved as it's JSON key. These are useful to define custom item models for a block.
+
+#### Complete example
+```json
+{
+	"defaults": {
+		"transform": "forge:default-block"
+	},
+	"variants": {
+		// Property with a variable
+		"value={0}": {
+			"textures": {
+				"all": "extendedmetadatatest:blocks/extended_metadata_{0}"
+			}
+		},
+		// Single property with it's values below
+		"half": {
+			"false": {
+				"model": "minecraft:cube_all"
+			},
+			"true": {
+				"model": "minecraft:half_slab",
+				"textures": {
+					"side": "#all",
+					"top": "#all",
+					"bottom": "#all",
+					"particle": "#all"
+				}
+			}
+		}
+	},
+	"customVariants": {
+		"inventory14": {
+			"model": "minecraft:stairs",
+			"textures": {
+				"all": "extendedmetadatatest:blocks/extended_metadata_7",
+				"side": "#all",
+				"top": "#all",
+				"bottom": "#all"
+			}
+		}
+	}
+}
+```
+
+### Usage
+If you want to use the new format for a block you first need to register it with ExtendedMetdata, like so:
+```java
+// During pre-initialization in your client proxy
+EMModelLoader.registerBlock(block);
+```
+To also load the block models as inventory / item models, register them like this: (you probably want to do this unless the inventory model is supposed to be different from the block model)
+```java
+// During pre-initialization in your client proxy
+EMModelLoader.registerBlockItemModels(block);
+```
+Forge will probably give a warning about <block name>#inventory not being found, but you can ignore it.
+But if you want to use custom models you can specify them in your blockstate json file under the `customVariants` tag and register them with Forge:
+```java
+// During pre-initialization in your client proxy
+// Replace 14 with your metadata value
+// Replace "inventory14" with the key of the custom variant in your blockstate json
+EMModelLoader.registerBlockItemModel(block, 14, "inventory14");
+```
 
 ## Dependencies
 * [Minecraft Forge](http://minecraftforge.net) 11.14.3.1487 or higher
@@ -121,3 +200,7 @@ Change value from `31999` to `65535`
 
 ##### Method: `int registerBlock(Block, String, int)`
 The last lines are replaced by `int ExtendedMetadata.getIDFromState(int, IBlockState)` to change how block states are formed.
+
+#### net.minecraftforge.client.model.ModeLoader
+##### Method: `IRegistry setupModelRegistry()` *CLIENT SIDE ONLY*
+Insert hook to `void load(ModelLoader)` to load blocks that use the custom block state format

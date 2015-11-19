@@ -4,9 +4,6 @@ import java.io.File;
 import java.util.ListIterator;
 import java.util.Map;
 
-import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
-
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -30,6 +27,8 @@ import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
 import codechicken.lib.asm.ModularASMTransformer.MethodReplacer;
 import codechicken.lib.asm.ModularASMTransformer.MethodWriter;
 import codechicken.lib.asm.ObfMapping;
+import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
 public class EMTransformer implements IClassTransformer {
 
@@ -323,8 +322,7 @@ public class EMTransformer implements IClassTransformer {
 			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_1"), asmblocks.get("playAusSFX_1")));
 			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/client/renderer/RenderGlobal", "func_180439_a", "(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"), asmblocks.get("old_playAusSFX_2"), asmblocks.get("playAusSFX_2")));
 
-			final ASMBlock injection1 = asmblocks.get("setupModelRegistry");
-			final ASMBlock injection2 = asmblocks.get("loadItems");
+			final ASMBlock injection = asmblocks.get("setupModelRegistry");
 			transformer.add(new ClassNodeTransformer() {
 				@Override
 				public String className() {
@@ -336,9 +334,7 @@ public class EMTransformer implements IClassTransformer {
 					ASMHelper.dump(node, new File(EMCorePlugin.location, "../test"), true, true);
 					for(MethodNode methodNode : node.methods) {
 						if(methodNode.name.equals("setupModelRegistry") && methodNode.desc.equals("()Lnet/minecraft/util/IRegistry;")) {
-							methodNode.instructions.insert(injection1.rawListCopy());
-						} else if(methodNode.name.equals("loadItems") && methodNode.desc.equals("()V")) {
-							methodNode.instructions.insert(injection2.rawListCopy());
+							methodNode.instructions.insert(injection.rawListCopy());
 						}
 					}
 				}

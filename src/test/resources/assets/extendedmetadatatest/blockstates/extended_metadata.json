@@ -17,12 +17,21 @@
 				"textures": {
 					"side": "#all",
 					"top": "#all",
-					"bottom": "#all"
+					"bottom": "#all",
+					"particle": "#all"
 				}
 			}
-		},
-		"inventory": {
-			"model": "minecraft:cube_all"
+		}
+	},
+	"customVariants": {
+		"inventory14": {
+			"model": "minecraft:stairs",
+			"textures": {
+				"all": "extendedmetadatatest:blocks/extended_metadata_7",
+				"side": "#all",
+				"top": "#all",
+				"bottom": "#all"
+			}
 		}
 	}
 }
