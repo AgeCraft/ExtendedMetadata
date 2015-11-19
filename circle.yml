@@ -5,6 +5,9 @@ general:
   artifacts: 
     - build/libs
 dependencies:
+  cache_directories:
+    - ".gradle"
+    - "build"
   pre:
     - chmod +x gradlew
 test:
