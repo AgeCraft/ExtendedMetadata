@@ -16,6 +16,16 @@ This mod changes the way your world is stored on disk. Old worlds get converted 
 ExtendedMetadata also increases the amount of disk storage and network bandwidth being used. This in can cause lag, you have been warned.
 Also be careful with the 1.8 model / texture loader, using too much metadata can cause out of memory errors. The solution for this is a custom model or texture loader, we have implemented this, but it might take some time to perfect.
 
+## Dependencies
+* [Minecraft Forge](http://minecraftforge.net) 11.14.4.1563 or higher
+* [CodeChickenCore](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.0.5.34 or higher
+* [CodeChickenLib](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.1.2.133 or higher
+
+## Installation
+1. [Download](http://files.minecraftforge.net) and install Minecraft Forge
+2. [Download](http://chickenbones.net/Pages/links.html) and install CodeChickenCore
+3. Download ExtendedMetadata and put the file in the mods folder
+
 ## Blockstate / Model Loader
 ExtendedMetadata also adds an improved blockstate / model loader, example: 
 * Implementation: https://github.com/AgeCraft/ExtendedMetadata/blob/1.8/src/test/java/org/agecraft/extendedmetadata/test/ExtendedMetadataTest.java
@@ -98,16 +108,6 @@ But if you want to use custom models you can specify them in your blockstate jso
 // Replace "inventory14" with the key of the custom variant in your blockstate json
 EMModelLoader.registerBlockItemModel(block, 14, "inventory14");
 ```
-
-## Dependencies
-* [Minecraft Forge](http://minecraftforge.net) 11.14.4.1563 or higher
-* [CodeChickenCore](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.0.5.34 or higher
-* [CodeChickenLib](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.1.2.133 or higher
-
-## Installation
-1. [Download](http://files.minecraftforge.net) and install Minecraft Forge
-2. [Download](http://chickenbones.net/Pages/links.html) and install CodeChickenCore
-3. Download ExtendedMetadata and put the file in the mods folder
 
 ## Changes
 The changes made by the ASM transformer are listed below. Useful in the future as reference for updating to another Minecraft version or updating Forge changes.
