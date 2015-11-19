@@ -9,4 +9,4 @@ dependencies:
     - chmod +x gradlew
 test:
   pre:
-    - gradle build
+    - ./gradlew build
