@@ -5,11 +5,13 @@ general:
   artifacts: 
     - build/libs
 dependencies:
+  pre:
+    - chmod +x gradlew
+  post:
+    - gradle setupCIWorkspace
   cache_directories:
     - ".gradle"
     - "build"
-  pre:
-    - chmod +x gradlew
 test:
   pre:
     - ./gradlew build
