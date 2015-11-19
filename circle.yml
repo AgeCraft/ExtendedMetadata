@@ -4,6 +4,10 @@ machine:
 general:
   artifacts: 
     - build/libs
+dependencies:
+	pre:
+		- chmod +x gradlew
 test:
   pre:
+  	- chmod +x gradlew
     - gradle build
