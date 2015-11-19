@@ -8,10 +8,12 @@ dependencies:
   pre:
     - chmod +x gradlew
   post:
-    - gradle setupCIWorkspace
+    - ./gradlew setupCIWorkspace
   cache_directories:
     - ".gradle"
     - "build"
 test:
   pre:
     - ./gradlew build
+  override:
+    - ./gradlew test
