@@ -22,6 +22,7 @@ import codechicken.lib.asm.InsnComparator;
 import codechicken.lib.asm.InsnListSection;
 import codechicken.lib.asm.ModularASMTransformer;
 import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
+import codechicken.lib.asm.ModularASMTransformer.FieldWriter;
 import codechicken.lib.asm.ModularASMTransformer.MethodReplacer;
 import codechicken.lib.asm.ModularASMTransformer.MethodWriter;
 import codechicken.lib.asm.ObfMapping;
@@ -30,6 +31,8 @@ import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
 public class EMTransformer implements IClassTransformer {
 
+	public static boolean ENABLE_PERFORMANCE_TWEAKS = true;
+	
 	private ModularASMTransformer transformer = new ModularASMTransformer();
 	private Map<String, ASMBlock> asmblocks = ASMReader.loadResource("/assets/extendedmetadata/asm/blocks.asm");
 
@@ -312,8 +315,81 @@ public class EMTransformer implements IClassTransformer {
 			}
 		});
 
-		transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177235_a", "(Ljava/util/Map;)V"), asmblocks.get("buildPropertyValueTable")));
+		if(ENABLE_PERFORMANCE_TWEAKS) {
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177226_a", "(Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("old_withProperty"), asmblocks.get("withProperty")));
+			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177235_a", "(Ljava/util/Map;)V"), asmblocks.get("deprecatedMethod")));
+			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "getPropertyValueTable", "()Lcom/google/common/collect/ImmutableTable;"), asmblocks.get("deprecatedMethod")));
+	
+			transformer.add(new FieldWriter(Opcodes.ACC_PRIVATE, new ObfMapping("net/minecraft/block/state/BlockState", "stateMap", "Ljava/util/Map;")));
+			transformer.add(new MethodEditor(new ObfMapping("net/minecraft/block/state/BlockState", "<init>", "(Lnet/minecraft/block/Block;[Lnet/minecraft/block/properties/IProperty;Lcom/google/common/collect/ImmutableMap;)V")) {
+				@Override
+				public void transformMethod(ClassNode node, MethodNode methodNode) {
+					ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+					while(iterator.hasNext()) {
+						AbstractInsnNode insn = iterator.next();
+						if(insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+							MethodInsnNode methodInsn = (MethodInsnNode) insn;
+							if(methodInsn.name.equals("add") && methodInsn.desc.equals("(Ljava/lang/Object;)Z")) {
+								methodNode.instructions.set(insn, new InsnNode(Opcodes.POP));
+								break;
+							}
+						}
+					}
+				}
+			});
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/state/BlockState", "<init>", "(Lnet/minecraft/block/Block;[Lnet/minecraft/block/properties/IProperty;Lcom/google/common/collect/ImmutableMap;)V"), asmblocks.get("old_iteratorBuildPropertyValueTable"), asmblocks.get("iteratorBuildPropertyValueTable")));
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/state/BlockState", "<init>", "(Lnet/minecraft/block/Block;[Lnet/minecraft/block/properties/IProperty;Lcom/google/common/collect/ImmutableMap;)V"), asmblocks.get("old_iteratorBuildPropertyValueTable2"), asmblocks.get("iteratorBuildPropertyValueTable2")));
+			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState", "getStateMap", "()Lcom/google/common/collect/ImmutableMap;"), asmblocks.get("getStateMap")));
+			
+			transformer.add(new ClassNodeTransformer() {
+				
+				private Map<String, ASMBlock> asmblocks;
+				
+				public ClassNodeTransformer setASMBlocks(Map<String, ASMBlock> asmblocks) {
+					this.asmblocks = asmblocks;
+					return this;
+				}
+				
+				@Override
+				public String className() {
+					return "net.minecraftforge.common.property.ExtendedBlockState$ExtendedStateImplementation";
+				}
 
+				@Override
+				public void transform(ClassNode node) {
+					node.visitField(Opcodes.ACC_PUBLIC, "testField", "I", null, null);
+					
+					for(MethodNode methodNode : node.methods) {
+						if(methodNode.name.equals("<init>") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Lcom/google/common/collect/ImmutableMap;Lcom/google/common/collect/ImmutableMap;Lcom/google/common/collect/ImmutableTable;)V")) {
+							replace(methodNode, asmblocks.get("old_setPropertyValueTable"), asmblocks.get("setPropertyValueTable"));
+						} else if((methodNode.name.equals("func_177226_a") || methodNode.name.equals("withProperty")) && methodNode.desc.equals("(Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;")) {
+							replace(methodNode, asmblocks.get("old_extendedWithProperty"), asmblocks.get("extendedWithProperty"));
+							replace(methodNode, asmblocks.get("old_extendedWithProperty2"), asmblocks.get("extendedWithProperty2"));
+						} else if(methodNode.name.equals("withProperty") && methodNode.desc.equals("(Lnet/minecraftforge/common/property/IUnlistedProperty;Ljava/lang/Object;)Lnet/minecraftforge/common/property/IExtendedBlockState;")) {
+							replace(methodNode, asmblocks.get("old_withUnlistedProperty"), asmblocks.get("extendedWithProperty"));
+							replace(methodNode, asmblocks.get("old_withUnlistedProperty2"), asmblocks.get("withUnlistedProperty2"));
+						} else if((methodNode.name.equals("func_177235_a") || methodNode.name.equals("buildPropertyValueTable")) && methodNode.desc.equals("(Ljava/util/Map;)V")) {
+							methodNode.instructions.clear();
+							if(methodNode.localVariables != null) {
+								methodNode.localVariables.clear();
+							}
+							if(methodNode.tryCatchBlocks != null) {
+								methodNode.tryCatchBlocks.clear();
+							}
+							asmblocks.get("deprecatedMethod").rawListCopy().accept(methodNode);
+						}
+					}
+				}
+				
+				private void replace(MethodNode methodNode, ASMBlock needle, ASMBlock replacement) {
+					for(InsnListSection key : InsnComparator.findN(methodNode.instructions, needle.list)) {
+						ASMBlock replaceBlock = replacement.copy().pullLabels(needle.applyLabels(key));
+						key.insert(replaceBlock.list.list);
+					}
+				}
+			}.setASMBlocks(asmblocks));
+		}
+			
 		if(FMLLaunchHandler.side().isClient()) {
 			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/world/chunk/Chunk", "func_177439_a", "([BIZ)V"), asmblocks.get("readChunkFromPacket")));
 

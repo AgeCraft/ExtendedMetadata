@@ -47,13 +47,20 @@ public class ExtendedMetadataTest {
 
 		GameRegistry.registerBlock(block, ItemBlockMetadata.class, BlockExtendedMetadata.NAME);
 
+		// Force load ExtendedBlockState for testing
+		try {
+			Class.forName("net.minecraftforge.common.property.ExtendedBlockState");
+		} catch(ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
 		proxy.preInit();
 	}
 
 	public static class CommonProxy {
 
 		public void preInit() {
-
+			
 		}
 	}
 
@@ -74,6 +81,7 @@ public class ExtendedMetadataTest {
 
 	public static class BlockExtendedMetadata extends BlockBasicMetadata {
 		
+		// Tested up to 32767, the maximum value (2^15 for values + 2^1 for half/full = 2^16 = 65536)
 		public static final int VALUE_SIZE = 15;
 
 		public static final String NAME = "extended_metadata";
