@@ -27,11 +27,14 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.NibbleArray;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ExtendedMetadata {
+	
+	public static final String UPDATE_URL = "https://raw.githubusercontent.com/AgeCraft/ExtendedMetadata/1.8/versions.json";
 
 	public static Method getData;
 	public static Method setData;
@@ -50,6 +53,8 @@ public class ExtendedMetadata {
 	public static Logger log = LogManager.getLogger("ExtendedMetadata");
 
 	public static void init() {
+		FMLInterModComms.sendMessage("llibrary", "update-checker", UPDATE_URL);
+		
 		try {
 			getData = EMUtil.getMethod(ExtendedBlockStorage.class, "getData", "func_177487_g", "g");
 			setData = EMUtil.getMethod(ExtendedBlockStorage.class, "setData", "func_177486_a", "a", int[].class);

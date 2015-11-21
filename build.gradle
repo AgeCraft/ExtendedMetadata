@@ -1,14 +1,14 @@
 plugins {
-	id "net.minecraftforge.gradle.forge" version "2.0.2",
-    id "com.matthewprenger.cursegradle" version "1.0.4"//,
-    // id "maven-publish"
+    id "net.minecraftforge.gradle.forge" version "2.0.2",
+    id "com.matthewprenger.cursegradle" version "1.0.4"
 }
+//id "maven-publish"
 
 repositories {
-	maven {
-		name = "chickenbones"
-		url = "http://chickenbones.net/maven"
-	}
+    maven {
+        name = "chickenbones"
+        url = "http://chickenbones.net/maven"
+    }
 }
 
 ext.configFile = file "build.properties"
