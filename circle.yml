@@ -17,7 +17,7 @@ test:
     - ./gradlew build
   override:
     - ./gradlew test
-deploy:
+deployment:
   1.8:
     branch: 1.8
     commands:
