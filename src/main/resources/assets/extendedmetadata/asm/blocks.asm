@@ -153,6 +153,15 @@ INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.getStateMap (Ljava/u
 ARETURN
 
 # net.minecraft.block.state.BlockState$StateImplementation
+list old_setPropertyValueTable
+ALOAD 0
+ALOAD 3
+PUTFIELD net/minecraft/block/state/BlockState$StateImplementation.propertyValueTable : Lcom/google/common/collect/ImmutableTable;
+
+list setPropertyValueTable
+ALOAD 3
+INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.checkPropertyValueTable (Lcom/google/common/collect/ImmutableTable;)V
+
 list deprecatedMethod
 NEW org/agecraft/extendedmetadata/DeprecatedMethodException
 DUP
@@ -181,12 +190,12 @@ INVOKEINTERFACE java/util/Map.get (Ljava/lang/Object;)Ljava/lang/Object;
 CHECKCAST net/minecraft/block/state/IBlockState
 
 # net.minecraftforge.common.property.ExtendedBlockState$ExtendedStateImplementation
-list old_setPropertyValueTable
+list old_setExtendedPropertyValueTable
 ALOAD 0
 ALOAD 4
 PUTFIELD net/minecraftforge/common/property/ExtendedBlockState$ExtendedStateImplementation.propertyValueTable : Lcom/google/common/collect/ImmutableTable;
 
-list setPropertyValueTable
+list setExtendedPropertyValueTable
 ALOAD 4
 INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.checkPropertyValueTable (Lcom/google/common/collect/ImmutableTable;)V
 

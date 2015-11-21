@@ -297,7 +297,6 @@ public class EMTransformer implements IClassTransformer {
 		transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/Block", "func_149671_p", "()V"), asmblocks.get("old_registerBlocks"), asmblocks.get("registerBlocks")));
 
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/block/properties/PropertyInteger", "<init>", "(Ljava/lang/String;II)V")) {
-
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
@@ -316,6 +315,7 @@ public class EMTransformer implements IClassTransformer {
 		});
 
 		if(ENABLE_PERFORMANCE_TWEAKS) {
+			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "<init>", "(Lnet/minecraft/block/Block;Lcom/google/common/collect/ImmutableMap;Lcom/google/common/collect/ImmutableTable;)V"), asmblocks.get("old_setPropertyValueTable"), asmblocks.get("setPropertyValueTable")));
 			transformer.add(new MethodReplacer(new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177226_a", "(Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;"), asmblocks.get("old_withProperty"), asmblocks.get("withProperty")));
 			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "func_177235_a", "(Ljava/util/Map;)V"), asmblocks.get("deprecatedMethod")));
 			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState$StateImplementation", "getPropertyValueTable", "()Lcom/google/common/collect/ImmutableTable;"), asmblocks.get("deprecatedMethod")));
@@ -342,7 +342,6 @@ public class EMTransformer implements IClassTransformer {
 			transformer.add(new MethodWriter(Opcodes.ACC_PUBLIC, new ObfMapping("net/minecraft/block/state/BlockState", "getStateMap", "()Lcom/google/common/collect/ImmutableMap;"), asmblocks.get("getStateMap")));
 			
 			transformer.add(new ClassNodeTransformer() {
-				
 				private Map<String, ASMBlock> asmblocks;
 				
 				public ClassNodeTransformer setASMBlocks(Map<String, ASMBlock> asmblocks) {
@@ -361,7 +360,7 @@ public class EMTransformer implements IClassTransformer {
 					
 					for(MethodNode methodNode : node.methods) {
 						if(methodNode.name.equals("<init>") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Lcom/google/common/collect/ImmutableMap;Lcom/google/common/collect/ImmutableMap;Lcom/google/common/collect/ImmutableTable;)V")) {
-							replace(methodNode, asmblocks.get("old_setPropertyValueTable"), asmblocks.get("setPropertyValueTable"));
+							replace(methodNode, asmblocks.get("old_setExtendedPropertyValueTable"), asmblocks.get("setExtendedPropertyValueTable"));
 						} else if((methodNode.name.equals("func_177226_a") || methodNode.name.equals("withProperty")) && methodNode.desc.equals("(Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;")) {
 							replace(methodNode, asmblocks.get("old_extendedWithProperty"), asmblocks.get("extendedWithProperty"));
 							replace(methodNode, asmblocks.get("old_extendedWithProperty2"), asmblocks.get("extendedWithProperty2"));
