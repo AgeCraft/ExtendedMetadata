@@ -1,5 +1,7 @@
 plugins {
-	id "net.minecraftforge.gradle.forge" version "2.0.2"
+	id "net.minecraftforge.gradle.forge" version "2.0.2",
+    id "com.matthewprenger.cursegradle" version "1.0.4"//,
+    // id "maven-publish"
 }
 
 repositories {
@@ -23,20 +25,20 @@ dependencies {
 }
 
 version = config.mod_version
-group= config.mod_group
+group = config.mod_group
 archivesBaseName = config.mod_name
 
 minecraft {
     version = config.minecraft_version + "-" + config.forge_version
     runDir = "run"
 
-    replace "@VERSION@", "${config.mod_version}.${System.getenv("CIRCLE_BUILD_NUM") ?: (System.getenv("BUILD_NUMBER") ?: 0)}"
+    replace "@VERSION@", "${config.mod_version}"
     replace "@MC_VERSION@", config.minecraft_version
 
     mappings = config.minecraft_mappings
 }
 
-version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("CIRCLE_BUILD_NUM") ?: (System.getenv("BUILD_NUMBER") ?: 0)}"
+version = "${config.minecraft_version}-${config.mod_version}"
 
 processResources {
     inputs.property "version", project.version
@@ -64,20 +66,96 @@ jar {
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
-    classifier = 'javadoc'
+    classifier = "javadoc"
 }
 
-task deobfJar(type: Jar) {
+task devJar(type: Jar) {
     from sourceSets.main.output
-    classifier = 'dev'
+    classifier = "dev"
     manifest commonManifest
 }
 
-build.dependsOn sourceJar, javadocJar, deobfJar
+build.dependsOn sourceJar, javadocJar, devJar
 
 artifacts {
-    archives sourceJar
-    archives javadocJar
-    archives deobfJar
+    archives devJar, sourceJar, javadocJar
 }
 
+// publishing {
+//     publications {
+//         mavenJava(MavenPublication) {
+//             groupId "org.agecraft.extendedmetadata"
+//             artifactId "ExtendedMetadata"
+//             version project.version
+
+//             from components.java
+
+//             artifact devJar {
+//                 classifier "dev"
+//             }
+
+//             artifact sourceJar {
+//                 classifier "sources"
+//             }
+
+//             artifact javadocJar {
+//                 classifier "javadoc"
+//             }
+//         }
+//     }
+//     repositories {
+//         maven {
+//             credentials {
+//                 username System.getenv("MAVEN_USERNAME") ?: "",
+//                 password System.getenv("MAVEN_PASSWORD") ?: ""
+//             }
+//             url System.getenv("MAVEN_REPO") ?: ""
+//         }
+//     }
+// }
+
+import groovy.json.JsonSlurper
+curseforge {
+    def url = "https://github.com/AgeCraft/ExtendedMetadata/raw/1.8/versions.json".toURL()
+    def versions = new JsonSlurper().parseText url.text
+
+    def type = "release"
+    def latestVersion = ""
+    versions.versions.each {v, changelog -> latestVersion = v}
+    if (versions.beta && versions.beta == latestVersion) {
+        type = "beta"
+    } else if (versions.alpha && versions.alpha == latestVersion) {
+        type = "alpha"
+    }
+
+    apiKey = System.getenv("CURSEFORGE_KEY") ?: ""
+    project {
+        id = System.getenv("CURSEFORGE_PROJECT") ?: ""
+
+        releaseType = type
+        changelog = versions.versions[versions.getAt(type)].join("\n* ") - "* "
+        changelogType = "markdown"
+
+        addGameVersion config.minecraft_version
+
+        relations {
+            requiredLibrary "codechickencore"
+        }
+
+        mainArtifact(jar) {
+            displayName = "ExtendedMetadata " + config.mod_version + " (MC " + config.minecraft_version + ")"
+        }
+
+        addArtifact(devJar) {
+            displayName = "ExtendedMetadata " + config.mod_version + " Development (MC " + config.minecraft_version + ")"
+        }
+
+        addArtifact(sourceJar) {
+            displayName = "ExtendedMetadata " + config.mod_version + " Sources (MC " + config.minecraft_version + ")"
+        }
+
+        addArtifact(javadocJar) {
+            displayName = "ExtendedMetadata " + config.mod_version + " Javadoc (MC " + config.minecraft_version + ")"
+        }
+    }
+}

@@ -1,0 +1,24 @@
+{
+	"release": "1.2.0",
+	"versions": {
+		"1.2.0": [
+			"Improved custom block state loader",
+			"Block item models are properly loaded"
+		],
+		"1.1.0": [
+			"Added custom block state loader"
+		],
+		"1.0.2": [
+			"Fixed development version"
+		],
+		"1.0.1": [
+			"Fixed crashes in obfuscated environments",
+			"Fixed load issues"
+		],
+		"1.0.0": [
+			"Initial version"
+		]
+	},
+	"updateUr": "http://goo.gl/HL6Soo",
+	"iconUrl": "https://raw.githubusercontent.com/AgeCraft/AgeCraft/master/src/main/resources/assets/agecraft/textures/logo/logo_white.png"
+}

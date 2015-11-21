@@ -17,3 +17,8 @@ test:
     - ./gradlew build
   override:
     - ./gradlew test
+deploy:
+  1.8:
+    branch: 1.8
+    commands:
+      - ./gradlew curseforge
