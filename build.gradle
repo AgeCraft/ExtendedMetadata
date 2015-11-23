@@ -148,12 +148,15 @@ artifacts {
 //         type = "alpha"
 //     }
 
+//     def changelogString = "* " + versions.versions[versions.getAt(type)].join("\n* ")
+//     changelogString = changelogString.substring(0, changelogString.length() - 2)
+
 //     apiKey = System.getenv("CURSEFORGE_KEY") ?: ""
 //     project {
 //         id = System.getenv("CURSEFORGE_PROJECT") ?: ""
 
 //         releaseType = type
-//         changelog = "* " + versions.versions[versions.getAt(type)].join("\n* ") - "* "
+//         changelog = changelogString
 //         changelogType = "markdown"
 
 //         addGameVersion config.minecraft_version
