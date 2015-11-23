@@ -1,8 +1,23 @@
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
-    id "com.matthewprenger.cursegradle" version "1.0.3"
-    id "maven-publish"
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
+    }
 }
+
+plugins {
+    // id "net.minecraftforge.gradle.forge" version "2.0.2"
+    // id "com.matthewprenger.cursegradle" version "1.0.3"
+    // id "maven-publish"
+}
+
+apply plugin: "net.minecraftforge.gradle.forge"
 
 repositories {
     maven {
@@ -29,7 +44,7 @@ group = config.mod_group
 archivesBaseName = config.mod_name
 
 minecraft {
-    version = config.minecraft_version + "-" + config.forge_version
+    version = config.minecraft_version + "-" + config.forge_version + "-1.8.8" //temp, because it's a non-master branch
     runDir = "run"
 
     replace "@VERSION@", "${config.mod_version}"
@@ -49,7 +64,7 @@ processResources {
         
         expand "version":project.version, "mc_version":project.config.minecraft_version
     }
-        
+
     from(sourceSets.main.resources.srcDirs) {
         exclude "mcmod.info"
     }
@@ -81,86 +96,86 @@ artifacts {
     archives devJar, sourceJar, javadocJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId "org.agecraft.extendedmetadata"
-            artifactId "ExtendedMetadata"
-            version project.version
+// publishing {
+//     publications {
+//         mavenJava(MavenPublication) {
+//             groupId "org.agecraft.extendedmetadata"
+//             artifactId "ExtendedMetadata"
+//             version project.version
 
-            from components.java
+//             from components.java
 
-            artifact devJar {
-                classifier "dev"
-            }
+//             artifact devJar {
+//                 classifier "dev"
+//             }
 
-            artifact sourceJar {
-                classifier "sources"
-            }
+//             artifact sourceJar {
+//                 classifier "sources"
+//             }
 
-            artifact javadocJar {
-                classifier "javadoc"
-            }
+//             artifact javadocJar {
+//                 classifier "javadoc"
+//             }
 
-            pom.withXml {
-            	asNode().appendNode("description", "A Forge core mod that increases the block ID and metadata limit")
-            	asNode().appendNode("url", "https://github.com/AgeCraft/ExtendedMetadata")
-            }
-        }
-    }
-    repositories {
-        maven {
-            credentials {
-                username System.getenv("MAVEN_USERNAME") ?: "",
-                password System.getenv("MAVEN_PASSWORD") ?: ""
-            }
-            url System.getenv("MAVEN_REPO") ?: ""
-        }
-    }
-}
+//             pom.withXml {
+//             	asNode().appendNode("description", "A Forge core mod that increases the block ID and metadata limit")
+//             	asNode().appendNode("url", "https://github.com/AgeCraft/ExtendedMetadata")
+//             }
+//         }
+//     }
+//     repositories {
+//         maven {
+//             credentials {
+//                 username System.getenv("MAVEN_USERNAME") ?: ""
+//                 password System.getenv("MAVEN_PASSWORD") ?: ""
+//             }
+//             url System.getenv("MAVEN_REPO") ?: ""
+//         }
+//     }
+// }
 
-import groovy.json.JsonSlurper
-curseforge {
-    def url = "https://github.com/AgeCraft/ExtendedMetadata/raw/1.8/versions.json".toURL()
-    def versions = new JsonSlurper().parseText url.text
+// import groovy.json.JsonSlurper
+// curseforge {
+//     def url = "https://github.com/AgeCraft/ExtendedMetadata/raw/1.8/versions.json".toURL()
+//     def versions = new JsonSlurper().parseText url.text
 
-    def type = "release"
-    def latestVersion = ""
-    versions.versions.each {v, changelog -> latestVersion = v}
-    if (versions.beta && versions.beta == latestVersion) {
-        type = "beta"
-    } else if (versions.alpha && versions.alpha == latestVersion) {
-        type = "alpha"
-    }
+//     def type = "release"
+//     def latestVersion = ""
+//     versions.versions.each {v, changelog -> latestVersion = v}
+//     if (versions.beta && versions.beta == latestVersion) {
+//         type = "beta"
+//     } else if (versions.alpha && versions.alpha == latestVersion) {
+//         type = "alpha"
+//     }
 
-    apiKey = System.getenv("CURSEFORGE_KEY") ?: ""
-    project {
-        id = System.getenv("CURSEFORGE_PROJECT") ?: ""
+//     apiKey = System.getenv("CURSEFORGE_KEY") ?: ""
+//     project {
+//         id = System.getenv("CURSEFORGE_PROJECT") ?: ""
 
-        releaseType = type
-        changelog = versions.versions[versions.getAt(type)].join("\n* ") - "* "
-        changelogType = "markdown"
+//         releaseType = type
+//         changelog = versions.versions[versions.getAt(type)].join("\n* ") - "* "
+//         changelogType = "markdown"
 
-        addGameVersion config.minecraft_version
+//         addGameVersion config.minecraft_version
 
-        relations {
-            requiredLibrary "codechickencore"
-        }
+//         relations {
+//             requiredLibrary "codechickencore"
+//         }
 
-        mainArtifact(jar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " (MC " + config.minecraft_version + ")"
-        }
+//         mainArtifact(jar) {
+//             displayName = "ExtendedMetadata " + config.mod_version + " (MC " + config.minecraft_version + ")"
+//         }
 
-        addArtifact(devJar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " Development (MC " + config.minecraft_version + ")"
-        }
+//         addArtifact(devJar) {
+//             displayName = "ExtendedMetadata " + config.mod_version + " Development (MC " + config.minecraft_version + ")"
+//         }
 
-        addArtifact(sourceJar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " Sources (MC " + config.minecraft_version + ")"
-        }
+//         addArtifact(sourceJar) {
+//             displayName = "ExtendedMetadata " + config.mod_version + " Sources (MC " + config.minecraft_version + ")"
+//         }
 
-        addArtifact(javadocJar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " Javadoc (MC " + config.minecraft_version + ")"
-        }
-    }
-}
+//         addArtifact(javadocJar) {
+//             displayName = "ExtendedMetadata " + config.mod_version + " Javadoc (MC " + config.minecraft_version + ")"
+//         }
+//     }
+// }
