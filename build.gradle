@@ -138,7 +138,7 @@ curseforge {
         id = System.getenv("CURSEFORGE_PROJECT") ?: ""
 
         releaseType = type
-        changelog = versions.versions[versions.getAt(type)].join("\n* ") - "* "
+        changelog = "* " + versions.versions[versions.getAt(type)].join("\n* ") - "* "
         changelogType = "markdown"
 
         addGameVersion config.minecraft_version
