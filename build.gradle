@@ -1,8 +1,8 @@
 plugins {
     id "net.minecraftforge.gradle.forge" version "2.0.2"
     id "com.matthewprenger.cursegradle" version "1.0.3"
+    id "maven-publish"
 }
-//id "maven-publish"
 
 repositories {
     maven {
@@ -81,38 +81,43 @@ artifacts {
     archives devJar, sourceJar, javadocJar
 }
 
-// publishing {
-//     publications {
-//         mavenJava(MavenPublication) {
-//             groupId "org.agecraft.extendedmetadata"
-//             artifactId "ExtendedMetadata"
-//             version project.version
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "org.agecraft.extendedmetadata"
+            artifactId "ExtendedMetadata"
+            version project.version
 
-//             from components.java
+            from components.java
 
-//             artifact devJar {
-//                 classifier "dev"
-//             }
+            artifact devJar {
+                classifier "dev"
+            }
 
-//             artifact sourceJar {
-//                 classifier "sources"
-//             }
+            artifact sourceJar {
+                classifier "sources"
+            }
 
-//             artifact javadocJar {
-//                 classifier "javadoc"
-//             }
-//         }
-//     }
-//     repositories {
-//         maven {
-//             credentials {
-//                 username System.getenv("MAVEN_USERNAME") ?: "",
-//                 password System.getenv("MAVEN_PASSWORD") ?: ""
-//             }
-//             url System.getenv("MAVEN_REPO") ?: ""
-//         }
-//     }
-// }
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+
+            pom.withXml {
+            	asNode().appendNode("description", "A Forge core mod that increases the block ID and metadata limit")
+            	asNode().appendNode("url", "https://github.com/AgeCraft/ExtendedMetadata")
+            }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username System.getenv("MAVEN_USERNAME") ?: "",
+                password System.getenv("MAVEN_PASSWORD") ?: ""
+            }
+            url System.getenv("MAVEN_REPO") ?: ""
+        }
+    }
+}
 
 import groovy.json.JsonSlurper
 curseforge {
