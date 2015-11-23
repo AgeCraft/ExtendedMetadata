@@ -26,7 +26,7 @@ import com.google.gson.JsonPrimitive;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockState.StateImplementation;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.JsonUtils;
 import net.minecraftforge.client.model.ForgeBlockStateV1;
 import net.minecraftforge.client.model.ForgeBlockStateV1.Variant;
@@ -89,8 +89,8 @@ public class EMBlockState {
 		}
 	}
 
-	public void load(Block block, Map<String, IProperty> properties, ImmutableList<StateImplementation> states) throws Exception {
-		for(StateImplementation state : states) {
+	public void load(Block block, Map<String, IProperty> properties, ImmutableList<IBlockState> states) throws Exception {
+		for(IBlockState state : states) {
 			List<Variant> list = Lists.newArrayList();
 
 			for(Entry<Collection<String>, Collection<JsonObject>> entry : variantsJson.asMap().entrySet()) {
@@ -142,7 +142,7 @@ public class EMBlockState {
 
 		for(Entry<String, JsonObject> entry : customVariants.entrySet()) {
 			Variant variant = (Variant) EMModelLoader.GSON.fromJson(entry.getValue(), Variant.class);
-			
+
 			if(defaults != null) {
 				EMModelLoader.sync.invoke(variant, defaults);
 			}

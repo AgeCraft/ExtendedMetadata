@@ -29,7 +29,7 @@ import com.google.gson.GsonBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
-import net.minecraft.block.state.BlockState.StateImplementation;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition;
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition.Variant;
@@ -82,18 +82,18 @@ public class EMModelLoader {
 	public static ResourceLocation getBlockStateLocation(ResourceLocation location) {
 		return new ResourceLocation(location.getResourceDomain(), "blockstates/" + location.getResourcePath() + ".json");
 	}
-	
+
 	public static void registerBlockItemModels(Block block) {
 		try {
 			if(createBlockState == null) {
 				createBlockState = EMUtil.getMethod(Block.class, "createBlockState", "func_180661_e", "e");
 			}
-			
+
 			BlockState state = ((BlockState) createBlockState.invoke(block));
-			ImmutableList<StateImplementation> states = state.getValidStates();
-			
+			ImmutableList<IBlockState> states = state.getValidStates();
+
 			ResourceLocation resourceLocation = (ResourceLocation) GameData.getBlockRegistry().getNameForObject(block);
-			for(StateImplementation s : states) {
+			for(IBlockState s : states) {
 				ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), block.getMetaFromState(s), new ModelResourceLocation(resourceLocation, getPropertyString(s.getProperties())));
 			}
 		} catch(Exception e) {
@@ -104,7 +104,7 @@ public class EMModelLoader {
 	public static void registerBlockItemModel(Block block, int metadata, String customVariant) {
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), metadata, new ModelResourceLocation((ResourceLocation) GameData.getBlockRegistry().getNameForObject(block), customVariant));
 	}
-	
+
 	public static void load(ModelLoader loader) {
 		try {
 			ExtendedMetadata.log.info("Loading block models");
@@ -120,13 +120,13 @@ public class EMModelLoader {
 			smartVariantConstructor = EMUtil.getConstructor(smartVariant, ResourceLocation.class, IModelState.class, boolean.class, int.class, ImmutableMap.class, ImmutableMap.class, ImmutableMap.class);
 
 			registerVariant = EMUtil.getMethod(ModelBakery.class, "registerVariant", "func_177569_a", "a", ModelBlockDefinition.class, ModelResourceLocation.class);
-			
+
 			blockDefinitions = EMUtil.getField(ModelBakery.class, "blockDefinitions", "field_177614_t", "t");
 			Map<ResourceLocation, ModelBlockDefinition> map = (Map<ResourceLocation, ModelBlockDefinition>) blockDefinitions.get(loader);
 
 			IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
 
-			for(Entry<Block, ResourceLocation> entry : blocks.entrySet()) {				
+			for(Entry<Block, ResourceLocation> entry : blocks.entrySet()) {
 				Iterator<IResource> iterator = resourceManager.getAllResources(entry.getValue()).iterator();
 
 				while(iterator.hasNext()) {
@@ -162,7 +162,7 @@ public class EMModelLoader {
 
 	private static ModelBlockDefinition loadModelBlockDefinition(Block block, ResourceLocation location, EMBlockState blockState) throws Exception {
 		BlockState state = ((BlockState) createBlockState.invoke(block));
-		ImmutableList<StateImplementation> states = state.getValidStates();
+		ImmutableList<IBlockState> states = state.getValidStates();
 
 		HashMap<String, IProperty> properties = Maps.newHashMap();
 		for(IProperty property : (Collection<IProperty>) state.getProperties()) {
@@ -171,7 +171,7 @@ public class EMModelLoader {
 		blockState.load(block, properties, states);
 
 		ArrayList<Variants> list = Lists.newArrayList();
-		
+
 		for(Entry<String, Collection<ForgeBlockStateV1.Variant>> entry : blockState.variants.asMap().entrySet()) {
 			ArrayList<Variant> variants = new ArrayList<Variant>();
 

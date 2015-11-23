@@ -34,7 +34,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ExtendedMetadata {
 	
-	public static final String UPDATE_URL = "https://raw.githubusercontent.com/AgeCraft/ExtendedMetadata/1.8/versions.json";
+	public static final String UPDATE_URL = "https://raw.githubusercontent.com/AgeCraft/ExtendedMetadata/1.8.8/versions.json";
 
 	public static Method getData;
 	public static Method setData;
