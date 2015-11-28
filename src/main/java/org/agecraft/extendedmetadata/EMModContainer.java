@@ -7,6 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.agecraft.extendedmetadata.asm.EMCorePlugin;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import net.minecraftforge.fml.client.FMLFileResourcePack;
 import net.minecraftforge.fml.client.FMLFolderResourcePack;
 import net.minecraftforge.fml.common.DummyModContainer;
@@ -15,13 +20,6 @@ import net.minecraftforge.fml.common.MetadataCollection;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.versioning.ArtifactVersion;
 import net.minecraftforge.fml.common.versioning.VersionParser;
-
-import org.agecraft.extendedmetadata.asm.EMCorePlugin;
-
-import codechicken.core.launch.CodeChickenCorePlugin;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 public class EMModContainer extends DummyModContainer {
 
@@ -39,7 +37,7 @@ public class EMModContainer extends DummyModContainer {
 	@Override
 	public Set<ArtifactVersion> getRequirements() {
 		Set<ArtifactVersion> deps = new HashSet<ArtifactVersion>();
-		deps.add(VersionParser.parseVersionReference("CodeChickenCore@[" + CodeChickenCorePlugin.version + ",)"));
+		deps.add(VersionParser.parseVersionReference("LLibrary@[@LLIBRARY_VERSION@,)"));
 		return deps;
 	}
 

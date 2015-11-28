@@ -89,7 +89,8 @@ public class EMBlockState {
 		}
 	}
 
-	public void load(Block block, Map<String, IProperty> properties, ImmutableList<IBlockState> states) throws Exception {
+	@SuppressWarnings("unchecked")
+	public <T extends Comparable<T>> void load(Block block, Map<String, IProperty<T>> properties, ImmutableList<IBlockState> states) throws Exception {
 		for(IBlockState state : states) {
 			List<Variant> list = Lists.newArrayList();
 
@@ -100,7 +101,7 @@ public class EMBlockState {
 				for(String key : entry.getKey()) {
 					String[] split = key.split("=");
 
-					IProperty property = properties.get(split[0]);
+					IProperty<T> property = properties.get(split[0]);
 					if(split[1].charAt(0) != '{' && !split[1].equals(property.getName(state.getValue(property)))) {
 						matches = false;
 						break;

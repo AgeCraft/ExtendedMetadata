@@ -45,6 +45,7 @@ public class ForgeBlockStatesLoaderDebug {
 		}
 	});
 
+	@SuppressWarnings("unchecked")
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		blockCustom.setUnlocalizedName(MODID + ".customBlock");
@@ -61,14 +62,14 @@ public class ForgeBlockStatesLoaderDebug {
 
 	@SideOnly(Side.CLIENT)
 	public void preInitClient(FMLPreInitializationEvent event) {
-		ModelLoader.setCustomStateMapper(blockCustom, new StateMap.Builder().setProperty(CustomMappedBlock.VARIANT).build());
+		ModelLoader.setCustomStateMapper(blockCustom, new StateMap.Builder().withName(CustomMappedBlock.VARIANT).build());
 
 		ModelLoader.setCustomStateMapper(blockCustomWall, new IStateMapper() {
-			StateMap stateMap = new StateMap.Builder().setProperty(BlockWall.VARIANT).setBuilderSuffix("_wall").build();
+			StateMap stateMap = new StateMap.Builder().withName(BlockWall.VARIANT).withSuffix("_wall").build();
 
 			@Override
-			public Map putStateModelLocations(Block block) {
-				Map<IBlockState, ModelResourceLocation> map = (Map<IBlockState, ModelResourceLocation>) stateMap.putStateModelLocations(block);
+			public Map<IBlockState, ModelResourceLocation> putStateModelLocations(Block block) {
+				Map<IBlockState, ModelResourceLocation> map = stateMap.putStateModelLocations(block);
 				Map<IBlockState, ModelResourceLocation> newMap = Maps.newHashMap();
 
 				for(Entry<IBlockState, ModelResourceLocation> e : map.entrySet()) {
@@ -87,7 +88,7 @@ public class ForgeBlockStatesLoaderDebug {
 
 	// this block is never actually used, it's only needed for the error message on load to see the variant it maps to
 	public static class CustomMappedBlock extends Block {
-		public static final PropertyEnum VARIANT = PropertyEnum.create("type", CustomVariant.class);
+		public static final PropertyEnum<CustomVariant> VARIANT = PropertyEnum.create("type", CustomVariant.class);
 
 		protected CustomMappedBlock() {
 			super(Material.rock);

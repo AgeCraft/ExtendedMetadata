@@ -92,14 +92,14 @@ public class ExtendedMetadata {
 		return Block.getBlockById((id >> 16) & 32767).getStateFromMeta(id & 65535);
 	}
 
-	public static ImmutableMap getStateMap(Map<?, ?> stateMap) {
+	public static ImmutableMap<?, ?> getStateMap(Map<?, ?> stateMap) {
 		if(!(stateMap instanceof ImmutableMap)) {
 			stateMap = ImmutableMap.copyOf(stateMap);
 		}
-		return (ImmutableMap) stateMap;
+		return (ImmutableMap<?, ?>) stateMap;
 	}
 	
-	public static void checkPropertyValueTable(ImmutableTable propertyValueTable) {
+	public static void checkPropertyValueTable(ImmutableTable<?, ?, ?> propertyValueTable) {
 		if(propertyValueTable != null) {
 			throw new DeprecatedMethodException(1);
 		}

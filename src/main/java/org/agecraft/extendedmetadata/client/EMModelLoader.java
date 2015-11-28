@@ -105,6 +105,7 @@ public class EMModelLoader {
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), metadata, new ModelResourceLocation((ResourceLocation) GameData.getBlockRegistry().getNameForObject(block), customVariant));
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void load(ModelLoader loader) {
 		try {
 			ExtendedMetadata.log.info("Loading block models");
@@ -160,12 +161,13 @@ public class EMModelLoader {
 		}
 	}
 
-	private static ModelBlockDefinition loadModelBlockDefinition(Block block, ResourceLocation location, EMBlockState blockState) throws Exception {
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private static <T extends Comparable<T>> ModelBlockDefinition loadModelBlockDefinition(Block block, ResourceLocation location, EMBlockState blockState) throws Exception {
 		BlockState state = ((BlockState) createBlockState.invoke(block));
 		ImmutableList<IBlockState> states = state.getValidStates();
 
-		HashMap<String, IProperty> properties = Maps.newHashMap();
-		for(IProperty property : (Collection<IProperty>) state.getProperties()) {
+		HashMap<String, IProperty<T>> properties = Maps.newHashMap();
+		for(IProperty<T> property : (Collection<IProperty>) state.getProperties()) {
 			properties.put(property.getName(), property);
 		}
 		blockState.load(block, properties, states);
@@ -188,9 +190,10 @@ public class EMModelLoader {
 
 			list.add(new Variants(entry.getKey(), variants));
 		}
-		return new ModelBlockDefinition((Collection) list);
+		return new ModelBlockDefinition((Collection<Variants>) list);
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static String getPropertyString(Map<IProperty, Comparable> map) {
 		StringBuilder builder = new StringBuilder();
 
@@ -199,8 +202,8 @@ public class EMModelLoader {
 				builder.append(",");
 			}
 
-			IProperty property = (IProperty) entry.getKey();
-			Comparable comparable = (Comparable) entry.getValue();
+			IProperty property = entry.getKey();
+			Comparable comparable = entry.getValue();
 			builder.append(property.getName());
 			builder.append("=");
 			builder.append(property.getName(comparable));

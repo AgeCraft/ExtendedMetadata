@@ -16,16 +16,17 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import codechicken.lib.asm.ASMBlock;
-import codechicken.lib.asm.ASMReader;
-import codechicken.lib.asm.InsnComparator;
-import codechicken.lib.asm.InsnListSection;
-import codechicken.lib.asm.ModularASMTransformer;
-import codechicken.lib.asm.ModularASMTransformer.ClassNodeTransformer;
-import codechicken.lib.asm.ModularASMTransformer.FieldWriter;
-import codechicken.lib.asm.ModularASMTransformer.MethodReplacer;
-import codechicken.lib.asm.ModularASMTransformer.MethodWriter;
-import codechicken.lib.asm.ObfMapping;
+import net.ilexiconn.llibrary.asm.ASMBlock;
+import net.ilexiconn.llibrary.asm.ASMReader;
+import net.ilexiconn.llibrary.asm.InsnComparator;
+import net.ilexiconn.llibrary.asm.InsnListSection;
+import net.ilexiconn.llibrary.asm.ModularASMTransformer;
+import net.ilexiconn.llibrary.asm.ModularASMTransformer.ClassNodeTransformer;
+import net.ilexiconn.llibrary.asm.ModularASMTransformer.FieldTypeChanger;
+import net.ilexiconn.llibrary.asm.ModularASMTransformer.FieldWriter;
+import net.ilexiconn.llibrary.asm.ModularASMTransformer.MethodReplacer;
+import net.ilexiconn.llibrary.asm.ModularASMTransformer.MethodWriter;
+import net.ilexiconn.llibrary.asm.ObfMapping;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 

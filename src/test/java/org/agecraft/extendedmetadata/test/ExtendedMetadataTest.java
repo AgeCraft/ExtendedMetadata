@@ -117,7 +117,7 @@ public class ExtendedMetadataTest {
 		}
 
 		@Override
-		public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity) {
+		public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity) {
 			setBlockBoundsBasedOnState(world, pos);
 			super.addCollisionBoxesToList(world, pos, state, mask, list, collidingEntity);
 		}
@@ -162,7 +162,7 @@ public class ExtendedMetadataTest {
 		}
 
 		@Override
-		public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 			for(int i = 0; i < 16; i++) {
 				list.add(new ItemStack(item, 1, i << 1));
 				list.add(new ItemStack(item, 1, i << 1 | 1));
