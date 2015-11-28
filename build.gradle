@@ -21,8 +21,8 @@ apply plugin: "net.minecraftforge.gradle.forge"
 
 repositories {
     maven {
-        name = "chickenbones"
-        url = "http://chickenbones.net/maven"
+        name = "ilexiconn"
+        url = "http://maven.ilexiconn.net/"
     }
 }
 
@@ -35,8 +35,7 @@ configFile.withReader {
 }
 
 dependencies {
-    compile "codechicken:CodeChickenLib:${config.minecraft_version}-${config.ccl_version}:dev"
-    compile "codechicken:CodeChickenCore:${config.minecraft_version}-${config.ccc_version}:dev"
+    compile "net.ilexiconn:llibrary:${config.llibrary_version}-${config.minecraft_version}:dev"
 }
 
 version = config.mod_version
@@ -49,6 +48,7 @@ minecraft {
 
     replace "@VERSION@", "${config.mod_version}"
     replace "@MC_VERSION@", config.minecraft_version
+    replace "@LLIBRARY_VERSION@", config.llibrary_version
 
     mappings = config.minecraft_mappings
 }
@@ -118,8 +118,8 @@ artifacts {
 //             }
 
 //             pom.withXml {
-//             	asNode().appendNode("description", "A Forge core mod that increases the block ID and metadata limit")
-//             	asNode().appendNode("url", "https://github.com/AgeCraft/ExtendedMetadata")
+//              asNode().appendNode("description", "A Forge core mod that increases the block ID and metadata limit")
+//              asNode().appendNode("url", "https://github.com/AgeCraft/ExtendedMetadata")
 //             }
 //         }
 //     }
