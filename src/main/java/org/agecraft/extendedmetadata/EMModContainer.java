@@ -39,7 +39,7 @@ public class EMModContainer extends DummyModContainer {
 	public Set<ArtifactVersion> getRequirements() {
 		Set<ArtifactVersion> deps = new HashSet<ArtifactVersion>();
 		if(!llibraryVersion.contains("@")) {
-			deps.add(VersionParser.parseVersionReference("LLibrary@[" + llibraryVersion + ",)"));
+			deps.add(VersionParser.parseVersionReference("llibrary@[" + llibraryVersion + ",)"));
 		}
 		return deps;
 	}
