@@ -148,15 +148,12 @@ curseforge {
         type = "alpha"
     }
 
-    def changelogString = "* " + versions.versions[versions.getAt(type)].join("\n* ")
-    changelogString = changelogString.substring(0, changelogString.length() - 2)
-
     apiKey = System.getenv("CURSEFORGE_KEY") ?: ""
     project {
         id = System.getenv("CURSEFORGE_PROJECT") ?: ""
 
         releaseType = type
-        changelog = changelogString
+        changelog = "* " + versions.versions[versions.getAt(type)].join("\n* ")
         changelogType = "markdown"
 
         addGameVersion config.minecraft_version
