@@ -1,6 +1,9 @@
 {
-	"release": "1.4.1",
+	"release": "1.4.2",
 	"versions": {
+		"1.4.2": [
+			"Actually fixed LLibrary dependency requirements"
+		],
 		"1.4.1": [
 			"Fixed LLibrary dependency requirements"
 		],
