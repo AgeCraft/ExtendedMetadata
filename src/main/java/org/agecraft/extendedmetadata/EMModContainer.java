@@ -24,6 +24,7 @@ import net.minecraftforge.fml.common.versioning.VersionParser;
 public class EMModContainer extends DummyModContainer {
 
 	public static HashMap<String, Object> map = new HashMap<String, Object>();
+	public static final String llibraryVersion = "@LLIBRARY_VERSION@";
 
 	static {
 		map.put("name", "ExtendedMetadata");
@@ -37,7 +38,9 @@ public class EMModContainer extends DummyModContainer {
 	@Override
 	public Set<ArtifactVersion> getRequirements() {
 		Set<ArtifactVersion> deps = new HashSet<ArtifactVersion>();
-		deps.add(VersionParser.parseVersionReference("LLibrary@[@LLIBRARY_VERSION@,)"));
+		if(!llibraryVersion.contains("@")) {
+			deps.add(VersionParser.parseVersionReference("LLibrary@[" + llibraryVersion + ",)"));
+		}
 		return deps;
 	}
 

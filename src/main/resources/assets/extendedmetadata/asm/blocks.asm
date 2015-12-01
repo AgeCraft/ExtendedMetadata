@@ -12,21 +12,21 @@ ARETURN
 # net.minecraftforge.fml.common.registry.GameData
 list old_registerBlock
 GETSTATIC net/minecraftforge/fml/common/registry/GameData.BLOCKSTATE_TO_ID : Lnet/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap;
-ALOAD 7
-ILOAD 5
+ALOAD 6
+ILOAD 4
 ICONST_4
 ISHL
 ALOAD 1
-ALOAD 7
+ALOAD 6
 INVOKEVIRTUAL net/minecraft/block/Block.func_176201_c (Lnet/minecraft/block/state/IBlockState;)I
 IOR
 INVOKEVIRTUAL net/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap.put (Ljava/lang/Object;I)V
 
 list registerBlock
 GETSTATIC net/minecraftforge/fml/common/registry/GameData.BLOCKSTATE_TO_ID : Lnet/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap;
-ALOAD 7
-ILOAD 5
-ALOAD 7
+ALOAD 6
+ILOAD 4
+ALOAD 6
 INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.getIDFromState (ILnet/minecraft/block/state/IBlockState;)I
 INVOKEVIRTUAL net/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap.put (Ljava/lang/Object;I)V
 
@@ -117,14 +117,14 @@ INVOKESTATIC org/agecraft/extendedmetadata/client/EMModelLoader.load (Lnet/minec
 
 # net.minecraft.block.state.BlockState
 list old_iteratorBuildPropertyValueTable
-ALOAD 7
+ALOAD 6
 INVOKEINTERFACE java/util/Iterator.next ()Ljava/lang/Object;
 CHECKCAST net/minecraft/block/state/BlockState$StateImplementation
-ASTORE 8
-ALOAD 8
+ASTORE 7
+ALOAD 7
 ALOAD 4
 INVOKEVIRTUAL net/minecraft/block/state/BlockState$StateImplementation.buildPropertyValueTable (Ljava/util/Map;)V
-GOTO L16
+GOTO L14
 
 list old_iteratorBuildPropertyValueTable2
 ALOAD 0
@@ -133,7 +133,7 @@ INVOKESTATIC com/google/common/collect/ImmutableList.copyOf (Ljava/util/Collecti
 PUTFIELD net/minecraft/block/state/BlockState.validStates : Lcom/google/common/collect/ImmutableList;
 
 list iteratorBuildPropertyValueTable
-GOTO L16
+GOTO L14
 
 list iteratorBuildPropertyValueTable2
 ALOAD 0

@@ -27,6 +27,7 @@ import net.ilexiconn.llibrary.asm.ModularASMTransformer.FieldWriter;
 import net.ilexiconn.llibrary.asm.ModularASMTransformer.MethodReplacer;
 import net.ilexiconn.llibrary.asm.ModularASMTransformer.MethodWriter;
 import net.ilexiconn.llibrary.asm.ObfMapping;
+import net.ilexiconn.llibrary.common.config.LLibraryConfigHandler;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
@@ -38,10 +39,15 @@ public class EMTransformer implements IClassTransformer {
 	private Map<String, ASMBlock> asmblocks = ASMReader.loadResource("/assets/extendedmetadata/asm/blocks.asm");
 
 	public EMTransformer() {
+		// Force enable LLibrary ASM dumping
+		LLibraryConfigHandler.asmDump = true;
+		LLibraryConfigHandler.asmTextify = true;
+		
 		transformer.add(new FieldTypeChanger(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "field_177488_d", "[C"), "[I"));
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "<init>", "(IZ)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -50,18 +56,24 @@ public class EMTransformer implements IClassTransformer {
 						if(intInsn.operand == Opcodes.T_CHAR) {
 							intInsn.operand = Opcodes.T_INT;
 						}
+						executed++;
 					} else if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
+							executed++;
 						}
 					}
+				}
+				if(executed != 2) {
+					throw new RuntimeException("Failed to transform ExtendedBlockStorage.<init>");
 				}
 			}
 		});
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177485_a", "(III)Lnet/minecraft/block/state/IBlockState;")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -69,16 +81,22 @@ public class EMTransformer implements IClassTransformer {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
+							executed++;
 						}
 					} else if(insn.getOpcode() == Opcodes.CALOAD) {
 						methodNode.instructions.set(insn, new InsnNode(Opcodes.IALOAD));
+						executed++;
 					}
+				}
+				if(executed != 2) {
+					throw new RuntimeException("Failed to transform ExtendedBlockStorage.func_177485_a");
 				}
 			}
 		});
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177484_a", "(IIILnet/minecraft/block/state/IBlockState;)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -86,18 +104,25 @@ public class EMTransformer implements IClassTransformer {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
+							executed++;
 						}
 					} else if(insn.getOpcode() == Opcodes.I2C) {
 						methodNode.instructions.remove(insn);
+						executed++;
 					} else if(insn.getOpcode() == Opcodes.CASTORE) {
 						methodNode.instructions.set(insn, new InsnNode(Opcodes.IASTORE));
+						executed++;
 					}
+				}
+				if(executed != 3) {
+					throw new RuntimeException("Failed to transform ExtendedBlockStorage.func_177484_a");
 				}
 			}
 		});
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177487_g", "()[C")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				boolean executed = false;
 				methodNode.desc = "()[I";
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
@@ -106,20 +131,31 @@ public class EMTransformer implements IClassTransformer {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
+							executed = true;
 						}
 					}
+				}
+				if(!executed) {
+					throw new RuntimeException("Failed to transform ExtendedBlockStorage.func_177487_g");
 				}
 			}
 		});
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/storage/ExtendedBlockStorage", "func_177486_a", "([C)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				boolean executed = false;
 				methodNode.desc = "([I)V";
 				for(LocalVariableNode var : methodNode.localVariables) {
 					if(var.desc.equals("[C")) {
 						var.desc = "[I";
+						executed = true;
 					}
 				}
+				if(!executed) {
+					throw new RuntimeException("Failed to transform ExtendedBlockStorage.func_177486_a");
+				}
+				
+				executed = false;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -127,8 +163,12 @@ public class EMTransformer implements IClassTransformer {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177488_d") || fieldInsn.name.equals("d")) && fieldInsn.desc.equals("[C")) {
 							fieldInsn.desc = "[I";
+							executed = true;
 						}
 					}
+				}
+				if(!executed) {
+					throw new RuntimeException("Failed to transform ExtendedBlockStorage.func_177486_a");
 				}
 			}
 		});
@@ -136,6 +176,7 @@ public class EMTransformer implements IClassTransformer {
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/stats/StatList", "<clinit>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -143,10 +184,15 @@ public class EMTransformer implements IClassTransformer {
 						IntInsnNode intInsn = (IntInsnNode) insn;
 						if(intInsn.operand == 4096) {
 							methodNode.instructions.set(insn, new LdcInsnNode(new Integer(32768)));
-						} else if(intInsn.operand == 32000) {
+							executed++;
+						} else if(intInsn.operand == 32000) { // executed three times
 							methodNode.instructions.set(insn, new LdcInsnNode(new Integer(65536)));
+							executed++;
 						}
 					}
+				}
+				if(executed != 4) {
+					throw new RuntimeException("Failed to transform StatList.<clinit>");
 				}
 			}
 		});
@@ -154,6 +200,7 @@ public class EMTransformer implements IClassTransformer {
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/util/ObjectIntIdentityMap", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -161,6 +208,7 @@ public class EMTransformer implements IClassTransformer {
 						IntInsnNode intInsn = (IntInsnNode) insn;
 						if(intInsn.operand == 512) {
 							methodNode.instructions.set(insn, new LdcInsnNode(new Integer(8192)));
+							executed++;
 						}
 					} else if(insn.getOpcode() == Opcodes.INVOKESTATIC) {
 						MethodInsnNode methodInsn = (MethodInsnNode) insn;
@@ -168,8 +216,12 @@ public class EMTransformer implements IClassTransformer {
 							methodInsn.name = "newArrayListWithExpectedSize";
 							methodInsn.desc = "(I)Ljava/util/ArrayList;";
 							methodNode.instructions.insertBefore(insn, new LdcInsnNode(new Integer(8192)));
+							executed++;
 						}
 					}
+				}
+				if(executed != 2) {
+					throw new RuntimeException("Failed to transform ObjectIntIdentityMap.<init>");
 				}
 			}
 		});
@@ -178,6 +230,7 @@ public class EMTransformer implements IClassTransformer {
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "<init>", "()V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -185,19 +238,25 @@ public class EMTransformer implements IClassTransformer {
 						IntInsnNode intInsn = (IntInsnNode) insn;
 						if(intInsn.operand == Opcodes.T_SHORT) {
 							intInsn.operand = Opcodes.T_INT;
+							executed++;
 						}
 					} else if(insn.getOpcode() == Opcodes.PUTFIELD) {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
+							executed++;
 						}
 					}
+				}
+				if(executed != 2) {
+					throw new RuntimeException("Failed to transform ChunkPrimer.<init>");
 				}
 			}
 		});
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "func_177858_a", "(I)Lnet/minecraft/block/state/IBlockState;")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -205,16 +264,22 @@ public class EMTransformer implements IClassTransformer {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
+							executed++;
 						}
 					} else if(insn.getOpcode() == Opcodes.SALOAD) {
 						methodNode.instructions.set(insn, new InsnNode(Opcodes.IALOAD));
+						executed++;
 					}
+				}
+				if(executed != 2) {
+					throw new RuntimeException("Failed to transform ChunkPrimer.func_177858_a");
 				}
 			}
 		});
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/world/chunk/ChunkPrimer", "func_177857_a", "(ILnet/minecraft/block/state/IBlockState;)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				int executed = 0;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -222,12 +287,18 @@ public class EMTransformer implements IClassTransformer {
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
+							executed++;
 						}
 					} else if(insn.getOpcode() == Opcodes.I2S) {
 						methodNode.instructions.remove(insn);
+						executed++;
 					} else if(insn.getOpcode() == Opcodes.SASTORE) {
 						methodNode.instructions.set(insn, new InsnNode(Opcodes.IASTORE));
+						executed++;
 					}
+				}
+				if(executed != 3) {
+					throw new RuntimeException("Failed to transform ChunkPrimer.func_177857_a");
 				}
 			}
 		});
@@ -240,16 +311,23 @@ public class EMTransformer implements IClassTransformer {
 
 			@Override
 			public void transform(ClassNode node) {
+				int executed = 0;
 				for(FieldNode fieldNode : node.fields) {
 					if(fieldNode.desc.equals("I")) {
 						if(fieldNode.name.equals("MAX_BLOCK_ID")) {
 							fieldNode.value = 32767;
+							executed++;
 						} else if(fieldNode.name.equals("MIN_ITEM_ID")) {
 							fieldNode.value = 32768;
+							executed++;
 						} else if(fieldNode.name.equals("MAX_ITEM_ID")) {
 							fieldNode.value = 65535;
+							executed++;
 						}
 					}
+				}
+				if(executed != 3) {
+					throw new RuntimeException("Failed to transform GameData fields");
 				}
 			}
 		});
@@ -263,13 +341,18 @@ public class EMTransformer implements IClassTransformer {
 
 			@Override
 			public void transform(ClassNode node) {
+				boolean executed = false;
 				for(MethodNode methodNode : node.methods) {
-					if(methodNode.name.equals("registerBlock") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Ljava/lang/String;I)I")) {
+					if(methodNode.name.equals("registerBlock") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Lnet/minecraft/util/ResourceLocation;I)I")) {
 						for(InsnListSection key : InsnComparator.findN(methodNode.instructions, needle1.list)) {
 							ASMBlock replaceBlock = replacement1.copy().pullLabels(needle1.applyLabels(key));
 							key.insert(replaceBlock.list.list);
 						}
+						executed = true;
 					}
+				}
+				if(!executed) {
+					throw new RuntimeException("Failed to transform GameData.registerBlock");
 				}
 			}
 		});
@@ -280,13 +363,18 @@ public class EMTransformer implements IClassTransformer {
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/network/play/server/S21PacketChunkData", "func_180737_a", "(IZZ)I")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				boolean executed = false;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
 					if(insn.getOpcode() == Opcodes.ICONST_2) {
 						methodNode.instructions.set(insn, new InsnNode(Opcodes.ICONST_4));
+						executed = true;
 						break;
 					}
+				}
+				if(!executed) {
+					throw new RuntimeException("Failed to transform S21PacketChunkData.func_180737_a");
 				}
 			}
 		});
@@ -300,6 +388,7 @@ public class EMTransformer implements IClassTransformer {
 		transformer.add(new MethodEditor(new ObfMapping("net/minecraft/block/properties/PropertyInteger", "<init>", "(Ljava/lang/String;II)V")) {
 			@Override
 			public void transformMethod(ClassNode node, MethodNode methodNode) {
+				boolean executed = false;
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
@@ -309,8 +398,13 @@ public class EMTransformer implements IClassTransformer {
 							methodInsn.name = "newHashSetWithExpectedSize";
 							methodInsn.desc = "(I)Ljava/util/HashSet;";
 							methodNode.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ILOAD, 3));
+							executed = true;
+							break;
 						}
 					}
+				}
+				if(!executed) {
+					throw new RuntimeException("Failed to transform PropertyInteger.<init>");
 				}
 			}
 		});
@@ -325,16 +419,21 @@ public class EMTransformer implements IClassTransformer {
 			transformer.add(new MethodEditor(new ObfMapping("net/minecraft/block/state/BlockState", "<init>", "(Lnet/minecraft/block/Block;[Lnet/minecraft/block/properties/IProperty;Lcom/google/common/collect/ImmutableMap;)V")) {
 				@Override
 				public void transformMethod(ClassNode node, MethodNode methodNode) {
+					boolean executed = false;
 					ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 					while(iterator.hasNext()) {
 						AbstractInsnNode insn = iterator.next();
-						if(insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+						if(insn.getOpcode() == Opcodes.INVOKEINTERFACE) {
 							MethodInsnNode methodInsn = (MethodInsnNode) insn;
 							if(methodInsn.name.equals("add") && methodInsn.desc.equals("(Ljava/lang/Object;)Z")) {
 								methodNode.instructions.set(insn, new InsnNode(Opcodes.POP));
+								executed = true;
 								break;
 							}
 						}
+					}
+					if(!executed) {
+						throw new RuntimeException("Failed to transform BlockState.<init>");
 					}
 				}
 			});
@@ -357,17 +456,19 @@ public class EMTransformer implements IClassTransformer {
 
 				@Override
 				public void transform(ClassNode node) {
-					node.visitField(Opcodes.ACC_PUBLIC, "testField", "I", null, null);
-					
+					int executed = 0;
 					for(MethodNode methodNode : node.methods) {
 						if(methodNode.name.equals("<init>") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Lcom/google/common/collect/ImmutableMap;Lcom/google/common/collect/ImmutableMap;Lcom/google/common/collect/ImmutableTable;)V")) {
 							replace(methodNode, asmblocks.get("old_setExtendedPropertyValueTable"), asmblocks.get("setExtendedPropertyValueTable"));
+							executed++;
 						} else if((methodNode.name.equals("func_177226_a") || methodNode.name.equals("withProperty")) && methodNode.desc.equals("(Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;")) {
 							replace(methodNode, asmblocks.get("old_extendedWithProperty"), asmblocks.get("extendedWithProperty"));
 							replace(methodNode, asmblocks.get("old_extendedWithProperty2"), asmblocks.get("extendedWithProperty2"));
+							executed++;
 						} else if(methodNode.name.equals("withProperty") && methodNode.desc.equals("(Lnet/minecraftforge/common/property/IUnlistedProperty;Ljava/lang/Object;)Lnet/minecraftforge/common/property/IExtendedBlockState;")) {
 							replace(methodNode, asmblocks.get("old_withUnlistedProperty"), asmblocks.get("extendedWithProperty"));
 							replace(methodNode, asmblocks.get("old_withUnlistedProperty2"), asmblocks.get("withUnlistedProperty2"));
+							executed++;
 						} else if((methodNode.name.equals("func_177235_a") || methodNode.name.equals("buildPropertyValueTable")) && methodNode.desc.equals("(Ljava/util/Map;)V")) {
 							methodNode.instructions.clear();
 							if(methodNode.localVariables != null) {
@@ -377,7 +478,11 @@ public class EMTransformer implements IClassTransformer {
 								methodNode.tryCatchBlocks.clear();
 							}
 							asmblocks.get("deprecatedMethod").rawListCopy().accept(methodNode);
+							executed++;
 						}
+					}
+					if(executed != 4) {
+						throw new RuntimeException("Failed to transform ExtendedStateImplementation");
 					}
 				}
 				
@@ -405,10 +510,16 @@ public class EMTransformer implements IClassTransformer {
 
 				@Override
 				public void transform(ClassNode node) {
+					boolean executed = false;
 					for(MethodNode methodNode : node.methods) {
 						if(methodNode.name.equals("setupModelRegistry") && methodNode.desc.equals("()Lnet/minecraft/util/IRegistry;")) {
 							methodNode.instructions.insert(injection.rawListCopy());
+							executed = true;
+							break;
 						}
+					}
+					if(!executed) {
+						throw new RuntimeException("Failed to transformer ModeLoader.setupModelRegistry");
 					}
 				}
 			});
