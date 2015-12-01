@@ -162,7 +162,7 @@ curseforge {
         addGameVersion config.minecraft_version
 
         relations {
-            requiredLibrary "codechickencore"
+            requiredLibrary "llibrary"
         }
 
         mainArtifact(jar) {
