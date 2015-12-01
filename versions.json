@@ -1,6 +1,9 @@
 {
-	"release": "1.4.3",
+	"release": "1.4.4",
 	"versions": {
+		"1.4.4": [
+			"Fixed ChunkPrimer issues"
+		],
 		"1.4.3": [
 			"Removed LLibrary requirement check"
 		],
