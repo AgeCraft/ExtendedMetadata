@@ -1,6 +1,9 @@
 {
-	"release": "1.4.0",
+	"release": "1.4.1",
 	"versions": {
+		"1.4.1": [
+			"Fixed LLibrary dependency requirements"
+		],
 		"1.4.0": [
 			"Updated to 1.8.8",
 			"Removed CodeChickenLib and CodeChickenCore as dependencies",

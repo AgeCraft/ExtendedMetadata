@@ -48,7 +48,7 @@ minecraft {
 
     replace "@VERSION@", config.mod_version
     replace "@MC_VERSION@", config.minecraft_version
-    replace "@LLIBRARY_VERSION@", config.llibrary_version
+    replace "@LLIBRARY_VERSION@", config.llibrary_version + "-" + config.minecraft_version
 
     mappings = config.minecraft_mappings
 }
