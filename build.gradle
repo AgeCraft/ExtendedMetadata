@@ -12,7 +12,7 @@ buildscript {
 }
 
 plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
+    // id "net.minecraftforge.gradle.forge" version "2.0.2"
     id "com.matthewprenger.cursegradle" version "1.0.3"
     id "maven-publish"
 }
@@ -46,7 +46,7 @@ minecraft {
     version = config.minecraft_version + "-" + config.forge_version + "-1.8.8" //temp, because it's a non-master branch
     runDir = "run"
 
-    replace "@VERSION@", "${config.mod_version}"
+    replace "@VERSION@", config.mod_version
     replace "@MC_VERSION@", config.minecraft_version
     replace "@LLIBRARY_VERSION@", config.llibrary_version
 
@@ -75,7 +75,6 @@ def commonManifest = {
 }
 
 jar {
-    classifier = "universal"
     manifest commonManifest
 }
 
@@ -99,8 +98,8 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId "org.agecraft.extendedmetadata"
-            artifactId "ExtendedMetadata"
+            groupId config.mod_group
+            artifactId config.mod_name
             version project.version
 
             from components.java
@@ -163,19 +162,19 @@ curseforge {
         }
 
         mainArtifact(jar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " (MC " + config.minecraft_version + ")"
+            displayName = config.mod_name + " " + config.mod_version + " (MC " + config.minecraft_version + ")"
         }
 
         addArtifact(devJar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " Development (MC " + config.minecraft_version + ")"
+            displayName = config.mod_name + " " + config.mod_version + " Development (MC " + config.minecraft_version + ")"
         }
 
         addArtifact(sourceJar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " Sources (MC " + config.minecraft_version + ")"
+            displayName = config.mod_name + " " + config.mod_version + " Sources (MC " + config.minecraft_version + ")"
         }
 
         addArtifact(javadocJar) {
-            displayName = "ExtendedMetadata " + config.mod_version + " Javadoc (MC " + config.minecraft_version + ")"
+            displayName = config.mod_name + " " + config.mod_version + " Javadoc (MC " + config.minecraft_version + ")"
         }
     }
 }
