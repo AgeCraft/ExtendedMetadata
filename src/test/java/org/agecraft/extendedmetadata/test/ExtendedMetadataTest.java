@@ -54,6 +54,13 @@ public class ExtendedMetadataTest {
 			e.printStackTrace();
 		}
 		
+		// Force load ChunkPrimer for testing
+		try {
+			Class.forName("net.minecraft.world.chunk.ChunkPrimer");
+		} catch(ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
 		proxy.preInit();
 	}
 

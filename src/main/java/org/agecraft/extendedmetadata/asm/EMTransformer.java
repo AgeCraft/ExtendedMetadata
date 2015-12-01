@@ -260,7 +260,7 @@ public class EMTransformer implements IClassTransformer {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
-					if(insn.getOpcode() == Opcodes.GETFIELD) {
+					if(insn.getOpcode() == Opcodes.GETFIELD) { // executed two times
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
@@ -271,7 +271,7 @@ public class EMTransformer implements IClassTransformer {
 						executed++;
 					}
 				}
-				if(executed != 2) {
+				if(executed != 3) {
 					throw new RuntimeException("Failed to transform ChunkPrimer.func_177858_a");
 				}
 			}
@@ -283,7 +283,7 @@ public class EMTransformer implements IClassTransformer {
 				ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 				while(iterator.hasNext()) {
 					AbstractInsnNode insn = iterator.next();
-					if(insn.getOpcode() == Opcodes.GETFIELD) {
+					if(insn.getOpcode() == Opcodes.GETFIELD) { // executed two times
 						FieldInsnNode fieldInsn = (FieldInsnNode) insn;
 						if((fieldInsn.name.equals("data") || fieldInsn.name.equals("field_177860_a") || fieldInsn.name.equals("a")) && fieldInsn.desc.equals("[S")) {
 							fieldInsn.desc = "[I";
@@ -297,7 +297,7 @@ public class EMTransformer implements IClassTransformer {
 						executed++;
 					}
 				}
-				if(executed != 3) {
+				if(executed != 4) {
 					throw new RuntimeException("Failed to transform ChunkPrimer.func_177857_a");
 				}
 			}
