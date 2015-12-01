@@ -2,13 +2,13 @@ package org.agecraft.extendedmetadata;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.agecraft.extendedmetadata.asm.EMCorePlugin;
 
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -19,12 +19,10 @@ import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.MetadataCollection;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import net.minecraftforge.fml.common.versioning.VersionParser;
 
 public class EMModContainer extends DummyModContainer {
 
 	public static HashMap<String, Object> map = new HashMap<String, Object>();
-	public static final String llibraryVersion = "@LLIBRARY_VERSION@";
 
 	static {
 		map.put("name", "ExtendedMetadata");
@@ -37,11 +35,7 @@ public class EMModContainer extends DummyModContainer {
 
 	@Override
 	public Set<ArtifactVersion> getRequirements() {
-		Set<ArtifactVersion> deps = new HashSet<ArtifactVersion>();
-		if(!llibraryVersion.contains("@")) {
-			deps.add(VersionParser.parseVersionReference("llibrary@[" + llibraryVersion + ",)"));
-		}
-		return deps;
+		return Sets.newHashSet();
 	}
 
 	@Override
