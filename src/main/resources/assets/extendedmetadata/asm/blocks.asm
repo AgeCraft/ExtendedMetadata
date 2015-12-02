@@ -10,25 +10,21 @@ INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.getStateFromID (I)Ln
 ARETURN
 
 # net.minecraftforge.fml.common.registry.GameData
-list old_registerBlock
-GETSTATIC net/minecraftforge/fml/common/registry/GameData.BLOCKSTATE_TO_ID : Lnet/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap;
-ALOAD 6
-ILOAD 4
+list old_onAdd
+ALOAD 4
+ILOAD 2
 ICONST_4
 ISHL
 ALOAD 1
-ALOAD 6
+ALOAD 4
 INVOKEVIRTUAL net/minecraft/block/Block.func_176201_c (Lnet/minecraft/block/state/IBlockState;)I
 IOR
-INVOKEVIRTUAL net/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap.put (Ljava/lang/Object;I)V
 
-list registerBlock
-GETSTATIC net/minecraftforge/fml/common/registry/GameData.BLOCKSTATE_TO_ID : Lnet/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap;
-ALOAD 6
-ILOAD 4
-ALOAD 6
+list onAdd
+ALOAD 4
+ILOAD 2
+ALOAD 4
 INVOKESTATIC org/agecraft/extendedmetadata/ExtendedMetadata.getIDFromState (ILnet/minecraft/block/state/IBlockState;)I
-INVOKEVIRTUAL net/minecraftforge/fml/common/registry/GameData$ClearableObjectIntIdentityMap.put (Ljava/lang/Object;I)V
 
 # net.minecraft.world.Chunk
 list readChunkFromPacket

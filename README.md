@@ -198,7 +198,8 @@ Change value from `4096` to `32768`
 ##### Field: `MAX_ITEM_ID`
 Change value from `31999` to `65535`
 
-##### Method: `int registerBlock(Block, String, int)`
+#### net.minecraftforge.fml.common.registry.GameData$BlockStateCapture
+##### Method: `int onAdd(Block, int)`
 The last lines are replaced by `int ExtendedMetadata.getIDFromState(int, IBlockState)` to change how block states are formed.
 
 #### net.minecraftforge.client.model.ModeLoader

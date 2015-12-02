@@ -331,19 +331,19 @@ public class EMTransformer implements IClassTransformer {
 				}
 			}
 		});
-		final ASMBlock needle1 = asmblocks.get("old_registerBlock");
-		final ASMBlock replacement1 = asmblocks.get("registerBlock");
+		final ASMBlock needle1 = asmblocks.get("old_onAdd");
+		final ASMBlock replacement1 = asmblocks.get("onAdd");
 		transformer.add(new ClassNodeTransformer() {
 			@Override
 			public String className() {
-				return "net.minecraftforge.fml.common.registry.GameData";
+				return "net.minecraftforge.fml.common.registry.GameData$BlockStateCapture";
 			}
 
 			@Override
 			public void transform(ClassNode node) {
 				boolean executed = false;
 				for(MethodNode methodNode : node.methods) {
-					if(methodNode.name.equals("registerBlock") && methodNode.desc.equals("(Lnet/minecraft/block/Block;Lnet/minecraft/util/ResourceLocation;I)I")) {
+					if(methodNode.name.equals("onAdd") && methodNode.desc.equals("(Lnet/minecraft/block/Block;I)V")) {
 						for(InsnListSection key : InsnComparator.findN(methodNode.instructions, needle1.list)) {
 							ASMBlock replaceBlock = replacement1.copy().pullLabels(needle1.applyLabels(key));
 							key.insert(replaceBlock.list.list);
@@ -352,7 +352,7 @@ public class EMTransformer implements IClassTransformer {
 					}
 				}
 				if(!executed) {
-					throw new RuntimeException("Failed to transform GameData.registerBlock");
+					throw new RuntimeException("Failed to transform GameData$BlockStateCapture.onAdd");
 				}
 			}
 		});
