@@ -147,9 +147,9 @@ curseforge {
         type = "alpha"
     }
 
-    apiKey = System.getenv("CURSEFORGE_KEY") ?: ""
+    apiKey = System.getenv("CURSEFORGE_KEY") ?: "noid"
     project {
-        id = System.getenv("CURSEFORGE_PROJECT") ?: ""
+        id = System.getenv("CURSEFORGE_PROJECT") ?: "noid"
 
         releaseType = type
         changelog = "* " + versions.versions[versions.getAt(type)].join("\n* ")
