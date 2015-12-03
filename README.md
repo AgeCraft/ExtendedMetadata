@@ -17,13 +17,12 @@ ExtendedMetadata also increases the amount of disk storage and network bandwidth
 Also be careful with the 1.8 model / texture loader, using too much metadata can cause out of memory errors. The solution for this is a custom model or texture loader, we have implemented this, but it might take some time to perfect.
 
 ## Dependencies
-* [Minecraft Forge](http://minecraftforge.net) 11.14.4.1563 or higher
-* [CodeChickenCore](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.0.5.34 or higher
-* [CodeChickenLib](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1279956-chickenbones-mods) 1.1.2.133 or higher
+* [Minecraft Forge](http://minecraftforge.net) 11.15.0.1608 or higher
+* [LLibrary](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2430050-llibrary-the-modding-library-that-claims-to-be) 0.6.1 or higher
 
 ## Installation
 1. [Download](http://files.minecraftforge.net) and install Minecraft Forge
-2. [Download](http://chickenbones.net/Pages/links.html) and install CodeChickenCore
+2. [Download](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2430050-llibrary-the-modding-library-that-claims-to-be) and install LLibrary
 3. Download ExtendedMetadata and put the file in the mods folder
 
 ## Blockstate / Model Loader
@@ -107,6 +106,9 @@ But if you want to use custom models you can specify them in your blockstate jso
 // Replace 14 with your metadata value
 // Replace "inventory14" with the key of the custom variant in your blockstate json
 EMModelLoader.registerBlockItemModel(block, 14, "inventory14");
+
+// Replace all block item models with one custom variant
+EMModelLoader.registerBlockItemModel(block, "inventory");
 ```
 
 ## Changes
@@ -205,3 +207,5 @@ The last lines are replaced by `int ExtendedMetadata.getIDFromState(int, IBlockS
 #### net.minecraftforge.client.model.ModeLoader
 ##### Method: `IRegistry setupModelRegistry()` *CLIENT SIDE ONLY*
 Insert hook to `void load(ModelLoader)` to load blocks that use the custom block state format
+
+*Some other changes have been made to increase performance, this list will be updated soon to reflect these changes*
