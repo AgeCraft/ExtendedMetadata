@@ -1,6 +1,9 @@
 {
-	"release": "1.4.6",
+	"release": "1.4.7",
 	"versions": {
+		"1.4.7": [
+			"Fixed Java 8 compilation"
+		],
 		"1.4.6": [
 			"Forced Java 8 as dependency",
 			"Added utility method to register all block item models at once"
