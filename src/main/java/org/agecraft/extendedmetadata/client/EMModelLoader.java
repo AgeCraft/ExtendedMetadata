@@ -100,6 +100,24 @@ public class EMModelLoader {
 			e.printStackTrace();
 		}
 	}
+	
+	public static void registerBlockItemModels(Block block, String customVariant) {
+		try {
+			if(createBlockState == null) {
+				createBlockState = EMUtil.getMethod(Block.class, "createBlockState", "func_180661_e", "e");
+			}
+
+			BlockState state = ((BlockState) createBlockState.invoke(block));
+			ImmutableList<IBlockState> states = state.getValidStates();
+
+			ResourceLocation resourceLocation = (ResourceLocation) GameData.getBlockRegistry().getNameForObject(block);
+			for(IBlockState s : states) {
+				ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), block.getMetaFromState(s), new ModelResourceLocation(resourceLocation, customVariant));
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static void registerBlockItemModel(Block block, int metadata, String customVariant) {
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), metadata, new ModelResourceLocation((ResourceLocation) GameData.getBlockRegistry().getNameForObject(block), customVariant));

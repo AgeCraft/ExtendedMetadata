@@ -38,6 +38,9 @@ dependencies {
     compile "net.ilexiconn:llibrary:${config.llibrary_version}-${config.minecraft_version}:dev"
 }
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 version = config.mod_version
 group = config.mod_group
 archivesBaseName = config.mod_name
