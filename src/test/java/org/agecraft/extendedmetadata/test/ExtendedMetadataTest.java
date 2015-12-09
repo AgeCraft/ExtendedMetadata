@@ -16,6 +16,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
@@ -40,12 +41,15 @@ public class ExtendedMetadataTest {
 	public static CommonProxy proxy;
 
 	public static BlockExtendedMetadata block;
+	public static BlockWoolFence woolFence;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		block = new BlockExtendedMetadata();
+		woolFence = new BlockWoolFence();
 
 		GameRegistry.registerBlock(block, ItemBlockMetadata.class, BlockExtendedMetadata.NAME);
+		GameRegistry.registerBlock(woolFence, ItemBlockMetadata.class, BlockWoolFence.NAME);
 
 		// Force load ExtendedBlockState for testing
 		try {
@@ -53,21 +57,21 @@ public class ExtendedMetadataTest {
 		} catch(ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		// Force load ChunkPrimer for testing
 		try {
 			Class.forName("net.minecraft.world.chunk.ChunkPrimer");
 		} catch(ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		proxy.preInit();
 	}
 
 	public static class CommonProxy {
 
 		public void preInit() {
-			
+
 		}
 	}
 
@@ -75,19 +79,26 @@ public class ExtendedMetadataTest {
 
 		@Override
 		public void preInit() {
-			// Register block to use ExtendedMetadata's blockstate format
+			// Register blocks to use ExtendedMetadata's blockstate format
 			EMModelLoader.registerBlock(block);
-			
+			EMModelLoader.registerBlock(woolFence);
+
 			// Register the default item models for the block
 			EMModelLoader.registerBlockItemModels(block);
-			
+
 			// Register a custom item model for the block
 			EMModelLoader.registerBlockItemModel(block, 14, "inventory14");
+			
+			// Register a custom item model for all block subtypes
+//			EMModelLoader.registerBlockItemModels(woolFence, "inventory");
+			
+			// Register a custom item model for the block
+//			EMModelLoader.registerBlockItemModel(woolFence, 8, "proper_inventory");
 		}
 	}
 
 	public static class BlockExtendedMetadata extends BlockBasicMetadata {
-		
+
 		// Tested up to 32767, the maximum value (2^15 for values + 2^1 for half/full = 2^16 = 65536)
 		public static final int VALUE_SIZE = 15;
 
@@ -162,7 +173,7 @@ public class ExtendedMetadataTest {
 		public int getMetaFromState(IBlockState state) {
 			return (((Integer) state.getValue(VALUE)).intValue() << 1) | (((Boolean) state.getValue(HALF)).booleanValue() ? 1 : 0);
 		}
-		
+
 		@Override
 		protected BlockState createBlockState() {
 			return new BlockState(this, VALUE, HALF);
@@ -173,6 +184,171 @@ public class ExtendedMetadataTest {
 			for(int i = 0; i < 16; i++) {
 				list.add(new ItemStack(item, 1, i << 1));
 				list.add(new ItemStack(item, 1, i << 1 | 1));
+			}
+		}
+	}
+
+	public static class BlockWoolFence extends BlockBasicMetadata {
+
+		public static final String NAME = "wool_fence";
+
+		public static final PropertyBool NORTH = PropertyBool.create("north");
+		public static final PropertyBool EAST = PropertyBool.create("east");
+		public static final PropertyBool SOUTH = PropertyBool.create("south");
+		public static final PropertyBool WEST = PropertyBool.create("west");
+		public static final PropertyInteger COLOR = PropertyInteger.create("color", 0, 15);
+
+		public BlockWoolFence() {
+			super(Material.cloth);
+			setUnlocalizedName(MOD_ID.toLowerCase() + ":" + NAME);
+			setDefaultState(blockState.getBaseState().withProperty(COLOR, 0));
+			setHardness(0.8F);
+			setStepSound(Block.soundTypeCloth);
+			setCreativeTab(CreativeTabs.tabBlock);
+		}
+
+		@Override
+		public BlockState createBlockState() {
+			return new BlockState(this, NORTH, EAST, SOUTH, WEST, COLOR);
+		}
+
+		@Override
+		public int getMetaFromState(IBlockState state) {
+			return state.getValue(COLOR);
+		}
+
+		@Override
+		public IBlockState getStateFromMeta(int meta) {
+			return getDefaultState().withProperty(COLOR, meta);
+		}
+
+		@Override
+		public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+			return state.withProperty(NORTH, canConnectTo(world, state, pos.north())).withProperty(EAST, canConnectTo(world, state, pos.east())).withProperty(SOUTH, canConnectTo(world, state, pos.south())).withProperty(WEST, canConnectTo(world, state, pos.west()));
+		}
+
+		@Override
+		public boolean isOpaqueCube() {
+			return false;
+		}
+
+		@Override
+		public boolean isFullCube() {
+			return false;
+		}
+
+		@Override
+		public boolean isPassable(IBlockAccess world, BlockPos pos) {
+			return false;
+		}
+
+		@Override
+		public boolean shouldSideBeRendered(IBlockAccess world, BlockPos pos, EnumFacing side) {
+			return true;
+		}
+
+		public boolean canConnectTo(IBlockAccess world, IBlockState state, BlockPos pos) {
+			IBlockState other = world.getBlockState(pos);
+			Block block = other.getBlock();
+			if(block instanceof BlockWoolFence) {
+				return state.getValue(COLOR).equals(other.getValue(COLOR));
+			}
+			return block != Blocks.barrier && block.getMaterial().isOpaque() && block.isFullCube() ? block.getMaterial() != Material.gourd : false;
+		}
+
+		@Override
+		public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entity) {
+			boolean connectMinX = canConnectTo(world, state, pos.west());
+			boolean connectMaxX = canConnectTo(world, state, pos.east());
+			boolean connectMinZ = canConnectTo(world, state, pos.north());
+			boolean connectMaxZ = canConnectTo(world, state, pos.south());
+			float minX = 0.375F;
+			float maxX = 0.625F;
+			float minZ = 0.375F;
+			float maxZ = 0.625F;
+
+			if(connectMinZ) {
+				minZ = 0.0F;
+			}
+			if(connectMaxZ) {
+				maxZ = 1.0F;
+			}
+			if(connectMinZ || connectMaxZ) {
+				setBlockBounds(minX, 0.0F, minZ, maxX, 1.5F, maxZ);
+				super.addCollisionBoxesToList(world, pos, state, mask, list, entity);
+			}
+			minZ = 0.375F;
+			maxZ = 0.625F;
+			if(connectMinX) {
+				minX = 0.0F;
+			}
+			if(connectMaxX) {
+				maxX = 1.0F;
+			}
+			if(connectMinX || connectMaxX || !connectMinZ && !connectMaxZ) {
+				setBlockBounds(minX, 0.0F, minZ, maxX, 1.5F, maxZ);
+				super.addCollisionBoxesToList(world, pos, state, mask, list, entity);
+			}
+			if(connectMinZ) {
+				minZ = 0.0F;
+			}
+			if(connectMaxZ) {
+				maxZ = 1.0F;
+			}
+			setBlockBounds(minX, 0.0F, minZ, maxX, 1.0F, maxZ);
+		}
+
+		@Override
+		public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
+			IBlockState state = world.getBlockState(pos);
+			boolean connectMinZ = canConnectTo(world, state, pos.north());
+			boolean connectMaxZ = canConnectTo(world, state, pos.south());
+			boolean connectMinX = canConnectTo(world, state, pos.west());
+			boolean connectMaxX = canConnectTo(world, state, pos.east());
+			float minX = 0.375F;
+			float maxX = 0.625F;
+			float minZ = 0.375F;
+			float maxZ = 0.625F;
+
+			if(connectMinX) {
+				minX = 0.0F;
+			}
+			if(connectMaxX) {
+				maxX = 1.0F;
+			}
+			if(connectMinZ) {
+				minZ = 0.0F;
+			}
+			if(connectMaxZ) {
+				maxZ = 1.0F;
+			}
+			setBlockBounds(minX, 0.0F, minZ, maxX, 1.0F, maxZ);
+		}
+		
+		@Override
+		public String getLocalizedName() {
+			return getUnlocalizedName();
+		}
+
+		@Override
+		public String getLocalizedName(int meta) {
+			return getUnlocalizedName(meta);
+		}
+
+		@Override
+		public String getUnlocalizedName() {
+			return "Wool Fence";
+		}
+
+		@Override
+		public String getUnlocalizedName(int meta) {
+			return "Wool Fence " + meta;
+		}
+
+		@Override
+		public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
+			for(int i = 0; i < 16; i++) {
+				list.add(new ItemStack(item, 1, i));
 			}
 		}
 	}

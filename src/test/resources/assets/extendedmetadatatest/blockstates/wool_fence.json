@@ -1,0 +1,74 @@
+{
+	"defaults": {
+		"model": "extendedmetadatatest:fence_post",
+		"uvlock": true,
+		"transform": "forge:default-block"
+	},
+	"variants": {
+		"north": {
+			"true": {
+				"submodel": {
+					"north": {
+						"model": "extendedmetadatatest:fence_connect"
+					}
+				}
+			},
+			"false": {}
+		},
+		"south": {
+			"true": {
+				"submodel": {
+					"south": {
+						"model": "extendedmetadatatest:fence_connect",
+						"y": 180
+					}
+				}
+			},
+			"false": {}
+		},
+		"east": {
+			"true": {
+				"submodel": {
+					"east": {
+						"model": "extendedmetadatatest:fence_connect",
+						"y": 90
+					}
+				}
+			},
+			"false": {}
+		},
+		"west": {
+			"true": {
+				"submodel": {
+					"west": {
+						"model": "extendedmetadatatest:fence_connect",
+						"y": 270
+					}
+				}
+			},
+			"false": {}
+		},
+		"color={0}": {
+			"textures": {
+				"all": "extendedmetadatatest:blocks/extended_metadata_{0}"
+			}
+		}
+	},
+	"customVariants": {
+		"inventory": {
+			"submodel": {
+				"north": {
+					"model": "extendedmetadatatest:fence_connect"
+				},
+				"south": {
+					"model": "extendedmetadatatest:fence_connect",
+					"y": 180
+				}
+			}
+		},
+		"proper_inventory": {
+			"model": "extendedmetadatatest:fence_inventory",
+			"y": 90
+		}
+	}
+}
