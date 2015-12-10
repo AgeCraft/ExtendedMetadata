@@ -8,19 +8,19 @@
 	},
 	"variants": {
 		"north": {
-			"true": {"submodel": "forgeblockstatesloader:wall_connect"},	// Simple submodel declaration. You can also specify multiple submodels for a variant.
+			"true": {"submodel": {"north": {"model": "forgeblockstatesloader:wall_connect"}}},	// Simple submodel declaration. You can also specify multiple submodels for a variant.
 			"false": {}
 		},
 		"south": {
-			"true": {"submodel": "forgeblockstatesloader:wall_connect", "y": 180},
+			"true": {"submodel": {"south": {"model": "forgeblockstatesloader:wall_connect", "y": 180}}},
 			"false": {}
 		},
 		"east": {
-			"true": {"submodel": "forgeblockstatesloader:wall_connect", "y": 90},	// Submodel will be rotated.
+			"true": {"submodel": {"east": {"model": "forgeblockstatesloader:wall_connect", "y": 90}}},	// Submodel will be rotated.
 			"false": {}
 		},
 		"west": {
-			"true": {"submodel": "forgeblockstatesloader:wall_connect", "y": 270},
+			"true": {"submodel": {"west": {"model": "forgeblockstatesloader:wall_connect", "y": 270}}},
 			"false": {}
 		},
 		"up": {"true": {}, "false": {}},	// Must have this in here or the blockstates loader will not know of all the properties and values, and it will create the wrong vanilla state strings.
